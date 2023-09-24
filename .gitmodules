@@ -1,0 +1,3 @@
+[submodule "deps/icm"]
+	path = deps/icm
+	url = https://github.com/nullsrv/icm.git
