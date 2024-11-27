@@ -1,6 +1,35 @@
-#include "../include/mni/mni.h"
+// The MIT License
+// ===============
+// 
+// Copyright (c) 2023-2024 nullsrv
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+// SPDX-License-Identifier: MIT
 
-#include <shellapi.h>   // Shell_NotifyIconW
+#include "mni.h"
+
+#include <shellapi.h>       // Shell_NotifyIconW
+
+//#if defined(MNI_USE_ICM)
+//    #include <icm/icm.h>    // ImmersiveTrackPopupMenu
+//#endif
 
 #define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
 #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
@@ -20,8 +49,8 @@
 
 #define WM_APP_LAST                             (0xBFFF)
 
-#define TIMER_LMB_DOUBLE_CLICK_CHECK            (1)
-#define TIMER_PREVENT_DOUBLE_KEYSELECT          (2)
+#define TIMER_LMB_DOUBLE_CLICK_CHECK            (UINT_PTR)(-1)
+#define TIMER_PREVENT_DOUBLE_KEYSELECT          (UINT_PTR)(-2)
 
 #define TIMER_LMB_DOUBLE_CLICK_CHECK_INTERVAL   (100)
 #define TIMER_PREVENT_DOUBLE_KEYSELECT_INTERVAL (100)
@@ -148,7 +177,7 @@ static DWORD _RegGetDword(const wchar_t *lpSubKey, const wchar_t *lpValue) {
     DWORD dwData = 0;
     DWORD cbData = sizeof(dwData);
 
-    LSTATUS status = RegGetValueW(
+    LSTATUS status = RegGetValue(
         HKEY_CURRENT_USER,
         lpSubKey,
         lpValue,
@@ -206,36 +235,22 @@ static MniBool _IsHighContrastThemeEnabled(void) {
 // ========================================================================== //
 
 static MniThemeInfo _GetAppsThemeInfo(void) {
-    if (_AppsUseLightTheme()) {
-        return (MniThemeInfo){
-            .Theme              = MNI_THEME_LIGHT,
-            .TextColor          = 0x00000000,
-            .BackgroundColor    = 0x00FFFFFF,
-        };
-    }
-
+    MniBool light = _AppsUseLightTheme();
     return (MniThemeInfo){
-        .Theme              = MNI_THEME_DARK,
-        .TextColor          = 0x00FFFFFF,
-        .BackgroundColor    = 0x00000000,
+        .theme              = light ? MNI_THEME_LIGHT : MNI_THEME_DARK,
+        .text_color         = light ? 0x00000000 : 0x00FFFFFF,
+        .background_color   = light ? 0x00FFFFFF : 0x00000000,
     };
 }
 
 // ========================================================================== //
 
 static MniThemeInfo _GetSystemThemeInfo(void) {
-    if (_SystemUsesLightTheme()) {
-        return (MniThemeInfo){
-            .Theme              = MNI_THEME_LIGHT,
-            .TextColor          = 0x00000000,
-            .BackgroundColor    = 0x00FFFFFF,
-        };
-    }
-
+    MniBool light = _SystemUsesLightTheme();
     return (MniThemeInfo){
-        .Theme              = MNI_THEME_DARK,
-        .TextColor          = 0x00FFFFFF,
-        .BackgroundColor    = 0x00000000,
+        .theme              = light ? MNI_THEME_LIGHT : MNI_THEME_DARK,
+        .text_color         = light ? 0x00000000 : 0x00FFFFFF,
+        .background_color   = light ? 0x00FFFFFF : 0x00000000,
     };
 }
 
@@ -246,9 +261,9 @@ static MniThemeInfo _GetHighContrastThemeInfo(void) {
     DWORD bg = GetSysColor(COLOR_WINDOW);
 
     return (MniThemeInfo){
-        .Theme              = MNI_THEME_HIGHCONTRAST,
-        .TextColor          = fg,
-        .BackgroundColor    = bg,
+        .theme              = MNI_THEME_HIGHCONTRAST,
+        .text_color         = fg,
+        .background_color   = bg,
     };
 }
 
@@ -302,7 +317,6 @@ static int _StringCopyW(wchar_t *dest, int cch, const wchar_t *src) {
 
     if (!src) {
         dest[0] = L'\0';
-        i = 1;
     } else {
         for (i = 0; i < cch; i += 1) {
             dest[i] = src[i];
@@ -370,7 +384,7 @@ static int _StringCompareW(const wchar_t *lhs, const wchar_t *rhs, int cch) {
     int i = 0;
     for (i = 0; i < cch; i += 1) {
         if (lhs[i] != rhs[i]) {
-            return (unsigned char)lhs[i] < (unsigned char)rhs[i] ? -1 : 1;
+            return (unsigned short)lhs[i] < (unsigned short)rhs[i] ? -1 : 1;
         }
 
         if (lhs[i] == L'\0' || rhs[i] == L'\0') {
@@ -401,9 +415,9 @@ static MniBool _IsGuidEq(GUID guid1, GUID guid2) {
 // ========================================================================== //
 
 static MniBool _IsThemeInfoChanged(MniThemeInfo lhs, MniThemeInfo rhs) {
-    return lhs.Theme != rhs.Theme
-        || lhs.TextColor != rhs.TextColor
-        || lhs.BackgroundColor != rhs.BackgroundColor
+    return lhs.theme != rhs.theme
+        || lhs.text_color != rhs.text_color
+        || lhs.background_color != rhs.background_color
         ;
 }
 
@@ -434,13 +448,51 @@ static MniBool _UTF8ToUTF16(const char *utf8, wchar_t *utf16, int cch) {
     return MNI_TRUE;
 }
 
+// ========================================================================== //
+
+typedef struct _PtrToWideStringResult {
+    wchar_t buf[sizeof(void *) * 2 + 8];
+} _PtrToWideStringResult;
+
+static _PtrToWideStringResult _PtrToWideString(void *ptr, MniBool upper) {
+    uintptr_t value = (uintptr_t)ptr;
+    int len = sizeof(void *) * 2;
+    wchar_t local_buf[sizeof(void *) * 2];
+
+    for (int i = 0; i < len; i += 1) {
+        uintptr_t d = value & 0x0F;
+        if (d < 10) {
+            local_buf[i] = (wchar_t)('0' + d);
+        } else {
+            local_buf[i] = (wchar_t)((upper ? 'A' : 'a') + (d - 10));
+        }
+        value = value >> 4;
+    }
+
+    _PtrToWideStringResult result;
+    memset(&result, 0, sizeof(result));
+
+    int pos = 0;
+    result.buf[pos] = L'0';
+    pos += 1;
+    result.buf[pos] = L'x'; //upper ? L'X' : L'x';
+    pos += 1;
+
+    for (int i = 0; i < len; i += 1) {
+        result.buf[pos] = local_buf[len - i - 1];
+        pos += 1;
+    }
+
+    return result;
+}
+
 #pragma endregion
 
 // ========================================================================== //
 
 #pragma region Window Messages
 
-static MniBool _MniWmWindowCreate(ModernNotifyIcon *mni) {
+static MniBool _MniWmWindowCreate(Mni4 *mni) {
     MNI_TRACE(L"_MniWmWindowCreate()");
 
     if (mni->on_window_create) {
@@ -452,7 +504,7 @@ static MniBool _MniWmWindowCreate(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmWindowDestroy(ModernNotifyIcon *mni) {
+static MniBool _MniWmWindowDestroy(Mni4 *mni) {
     MNI_TRACE(L"_MniWmWindowDestroy()");
 
     if (mni->on_window_destroy) {
@@ -464,7 +516,7 @@ static MniBool _MniWmWindowDestroy(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmInit(ModernNotifyIcon *mni) {
+static MniBool _MniWmInit(Mni4 *mni) {
     MNI_TRACE(L"_MniWmInit()");
 
     if (mni->on_init) {
@@ -476,7 +528,7 @@ static MniBool _MniWmInit(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmRelease(ModernNotifyIcon *mni) {
+static MniBool _MniWmRelease(Mni4 *mni) {
     MNI_TRACE(L"_MniWmRelease()");
 
     if (mni->on_release) {
@@ -488,7 +540,7 @@ static MniBool _MniWmRelease(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmIconShow(ModernNotifyIcon *mni) {
+static MniBool _MniWmIconShow(Mni4 *mni) {
     MNI_TRACE(L"_MniWmIconShow()");
 
     if (mni->on_show) {
@@ -500,7 +552,7 @@ static MniBool _MniWmIconShow(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmIconHide(ModernNotifyIcon *mni) {
+static MniBool _MniWmIconHide(Mni4 *mni) {
     MNI_TRACE(L"_MniWmIconHide()");
 
     if (mni->on_hide) {
@@ -512,7 +564,7 @@ static MniBool _MniWmIconHide(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmIconChange(ModernNotifyIcon *mni, HICON icon) {
+static MniBool _MniWmIconChange(Mni4 *mni, HICON icon) {
     MNI_TRACE(L"_MniWmIconChange()");
 
     if (mni->on_icon_change) {
@@ -524,7 +576,7 @@ static MniBool _MniWmIconChange(ModernNotifyIcon *mni, HICON icon) {
 
 // ========================================================================== //
 
-static MniBool _MniWmMenuChange(ModernNotifyIcon *mni, HMENU menu) {
+static MniBool _MniWmMenuChange(Mni4 *mni, HMENU menu) {
     MNI_TRACE(L"_MniWmMenuChange()");
 
     if (mni->on_menu_change) {
@@ -536,7 +588,7 @@ static MniBool _MniWmMenuChange(ModernNotifyIcon *mni, HMENU menu) {
 
 // ========================================================================== //
 
-static MniBool _MniWmTipChange(ModernNotifyIcon *mni, const wchar_t *tip) {
+static MniBool _MniWmTipChange(Mni4 *mni, const wchar_t *tip) {
     MNI_TRACE(L"_MniWmTipChange()");
 
     if (mni->on_tip_change) {
@@ -548,7 +600,7 @@ static MniBool _MniWmTipChange(ModernNotifyIcon *mni, const wchar_t *tip) {
 
 // ========================================================================== //
 
-static MniBool _MniWmTipTypeChange(ModernNotifyIcon *mni, MniTipType mtt) {
+static MniBool _MniWmTipTypeChange(Mni4 *mni, MniTipType mtt) {
     MNI_TRACE(L"_MniWmTipTypeChange()");
 
     if (mni->on_tip_type_change) {
@@ -560,7 +612,7 @@ static MniBool _MniWmTipTypeChange(ModernNotifyIcon *mni, MniTipType mtt) {
 
 // ========================================================================== //
 
-static MniBool _MniWmKeySelect(ModernNotifyIcon *mni, int x, int y) {
+static MniBool _MniWmKeySelect(Mni4 *mni, int x, int y) {
     MNI_TRACE(
         L"_MniWmKeySelect(x=%d, y=%d), prevent_double_key_select=%d",
         x,
@@ -588,7 +640,7 @@ static MniBool _MniWmKeySelect(ModernNotifyIcon *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmLmbClick(ModernNotifyIcon *mni, int x, int y) {
+static MniBool _MniWmLmbClick(Mni4 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmLmbClick(x=%d, y=%d)", x, y);
 
     if (mni->on_lmb_click) {
@@ -600,7 +652,7 @@ static MniBool _MniWmLmbClick(ModernNotifyIcon *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmLmbDoubleClick(ModernNotifyIcon *mni, int x, int y) {
+static MniBool _MniWmLmbDoubleClick(Mni4 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmLmbDoubleClick(x=%d, y=%d)", x, y);
     
     if (mni->on_lmb_double_click) {
@@ -612,7 +664,7 @@ static MniBool _MniWmLmbDoubleClick(ModernNotifyIcon *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmMmbClick(ModernNotifyIcon *mni, int x, int y) {
+static MniBool _MniWmMmbClick(Mni4 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmMmbClick(x=%d, y=%d)", x, y);
 
     if (mni->on_mmb_click) {
@@ -624,7 +676,7 @@ static MniBool _MniWmMmbClick(ModernNotifyIcon *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmContextMenu(ModernNotifyIcon *mni, int x, int y) {
+static MniBool _MniWmContextMenu(Mni4 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmContextMenu(x=%d, y=%d)", x, y);
     if (mni->on_context_menu_open) {
         mni->on_context_menu_open(mni);
@@ -654,20 +706,33 @@ static MniBool _MniWmContextMenu(ModernNotifyIcon *mni, int x, int y) {
                 uFlags = uFlags | TPM_LAYOUTRTL;                
             }
 
+            //#if defined(MNI_USE_ICM)
+            //{
+            //    selected_item = ImmersiveTrackPopupMenu(
+            //        hSubMenu,
+            //        uFlags,
+            //        x,
+            //        y,
+            //        mni->window_handle,
+            //        NULL,
+            //        mni->icm_style,
+            //        mni->icm_theme,
+            //        mni->icm_animation
+            //    );
+            //}
+            //#else   
             {
-                selected_item = ImmersiveTrackPopupMenu(
+                selected_item = TrackPopupMenuEx(
                     hSubMenu,
                     uFlags,
                     x,
                     y,
                     mni->window_handle,
-                    NULL,
-                    mni->icm_style,
-                    mni->icm_theme
+                    NULL
                 );
             }
+            //#endif
 
-            // ??
             PostMessageW(mni->window_handle, WM_NULL, 0, 0);
         }
     }
@@ -686,7 +751,7 @@ static MniBool _MniWmContextMenu(ModernNotifyIcon *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonShow(ModernNotifyIcon *mni) {
+static MniBool _MniWmBalloonShow(Mni4 *mni) {
     MNI_TRACE(L"_MniWmBalloonShow()");
     
     if (mni->on_balloon_show) {
@@ -698,7 +763,7 @@ static MniBool _MniWmBalloonShow(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonHide(ModernNotifyIcon *mni) {
+static MniBool _MniWmBalloonHide(Mni4 *mni) {
     MNI_TRACE(L"_MniWmBalloonHide()");
 
     if (mni->on_balloon_hide) {
@@ -710,7 +775,7 @@ static MniBool _MniWmBalloonHide(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonTimeout(ModernNotifyIcon *mni) {
+static MniBool _MniWmBalloonTimeout(Mni4 *mni) {
     MNI_TRACE(L"_MniWmBalloonTimeout()");
 
     if (mni->on_balloon_timeout) {
@@ -722,7 +787,7 @@ static MniBool _MniWmBalloonTimeout(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonUserClick(ModernNotifyIcon *mni) {
+static MniBool _MniWmBalloonUserClick(Mni4 *mni) {
     MNI_TRACE(L"_MniWmBalloonUserClick()");
 
     if (mni->on_balloon_click) {
@@ -734,7 +799,7 @@ static MniBool _MniWmBalloonUserClick(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmRichPopupOpen(ModernNotifyIcon *mni, int x, int y) {
+static MniBool _MniWmRichPopupOpen(Mni4 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmRichPopupOpen(x=%d, y=%d)", x, y);
     
     if (mni->on_rich_popup_open) {
@@ -746,7 +811,7 @@ static MniBool _MniWmRichPopupOpen(ModernNotifyIcon *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmRichPopupClose(ModernNotifyIcon *mni) {
+static MniBool _MniWmRichPopupClose(Mni4 *mni) {
     MNI_TRACE(L"_MniWmRichPopupClose()");
     
     if (mni->on_rich_popup_close) {
@@ -758,7 +823,7 @@ static MniBool _MniWmRichPopupClose(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmDpiChange(ModernNotifyIcon *mni, int dpi) {
+static MniBool _MniWmDpiChange(Mni4 *mni, int dpi) {
     MNI_TRACE(L"_MniWmDpiChange(dpi=%d)", dpi);
     
     if (mni->dpi != dpi) {
@@ -774,7 +839,7 @@ static MniBool _MniWmDpiChange(ModernNotifyIcon *mni, int dpi) {
 
 // ========================================================================== //
 
-static MniBool _MniWmThemeChange(ModernNotifyIcon *mni, MniBool is_hc) {
+static MniBool _MniWmThemeChange(Mni4 *mni, MniBool is_hc) {
     MNI_TRACE(L"_MniWmThemeChange()");
 
     // When theme change this is invoked multiple times, using is_hc is unstable.
@@ -803,7 +868,7 @@ static MniBool _MniWmThemeChange(ModernNotifyIcon *mni, MniBool is_hc) {
     } else {
         // Check if system theme changed.
         MniThemeInfo sti = _GetSystemThemeInfo();
-        if (mni->system_theme.Theme != sti.Theme) {
+        if (mni->system_theme.theme != sti.theme) {
             if (mni->on_system_theme_change) {
                 mni->on_system_theme_change(mni, sti);
             }
@@ -813,7 +878,7 @@ static MniBool _MniWmThemeChange(ModernNotifyIcon *mni, MniBool is_hc) {
 
         // Check if apps theme changed.
         MniThemeInfo ati = _GetAppsThemeInfo();
-        if (mni->apps_theme.Theme != ati.Theme) {
+        if (mni->apps_theme.theme != ati.theme) {
             if (mni->on_apps_theme_change) {
                 mni->on_apps_theme_change(mni, ati);
             }
@@ -827,7 +892,7 @@ static MniBool _MniWmThemeChange(ModernNotifyIcon *mni, MniBool is_hc) {
 
 // ========================================================================== //
 
-static MniBool _MniWmTaskbarCreated(ModernNotifyIcon *mni) {
+static MniBool _MniWmTaskbarCreated(Mni4 *mni) {
     MNI_TRACE(
         L"_MniWmTaskbarCreated(), is_dpi_event=%d, primary_monitor=%p",
         mni->is_dpi_event,
@@ -861,7 +926,7 @@ static MniBool _MniWmTaskbarCreated(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmUserTimerTimeout(ModernNotifyIcon *mni, UINT id) {
+static MniBool _MniWmUserTimerTimeout(Mni4 *mni, UINT id) {
     MNI_TRACE(L"_MniWmUserTimerTimeout(id=%d)", id);
 
     if (id >= MNI_USER_TIMER_ID) {
@@ -875,7 +940,7 @@ static MniBool _MniWmUserTimerTimeout(ModernNotifyIcon *mni, UINT id) {
 
 // ========================================================================== //
 
-static MniBool _MniWmInternalTimerTimeout(ModernNotifyIcon *mni, UINT id) {
+static MniBool _MniWmInternalTimerTimeout(Mni4 *mni, UINT id) {
     MNI_TRACE(L"_MniWmInternalTimerTimeout(id=%d)", id);
 
     if (id >= MNI_USER_TIMER_ID) {
@@ -892,7 +957,7 @@ static MniBool _MniWmInternalTimerTimeout(ModernNotifyIcon *mni, UINT id) {
 
 // ========================================================================== //
 
-static MniBool _MniWmCustomMessage(ModernNotifyIcon *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static MniBool _MniWmCustomMessage(Mni4 *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE(L"_MniWmCustomMessage(uMsg=%d, wParam=%lld, lParam=%lld)", uMsg, wParam, lParam);
 
     if (mni->on_custom_message) {
@@ -904,7 +969,7 @@ static MniBool _MniWmCustomMessage(ModernNotifyIcon *mni, UINT uMsg, WPARAM wPar
 
 // ========================================================================== //
 
-static MniBool _MniWmSystemMessage(ModernNotifyIcon *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static MniBool _MniWmSystemMessage(Mni4 *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (mni->on_system_message) {
         return mni->on_system_message(mni, uMsg, wParam, lParam);
     }
@@ -918,13 +983,7 @@ static MniBool _MniWmSystemMessage(ModernNotifyIcon *mni, UINT uMsg, WPARAM wPar
 
 #pragma region Window Procedure
 
-static LRESULT _MniDispatch(
-    ModernNotifyIcon    *mni,
-    HWND                hWnd,
-    UINT                uMsg,
-    WPARAM              wParam,
-    LPARAM              lParam
-) {
+static LRESULT _MniDispatch(Mni4 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE2(L"_MniDispatch(uMsg=0x%04x, wParam=%lld, lParam=%lld)", uMsg, wParam, lParam);
 
     // Register message when taskbar is created to get notified when explorer.exe gets restarted.
@@ -950,8 +1009,7 @@ static LRESULT _MniDispatch(
             switch (LOWORD(lParam)) {
             // Left Click.
             //case NIN_SELECT:
-            //    if (KeySelect(GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam)))
-            //    {
+            //    if (_MniWmKeySelect(mni, GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam))) {
             //        return 0;
             //    }
             //    break;
@@ -1157,30 +1215,30 @@ static LRESULT _MniDispatch(
         }
     }
 
-    return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 // ========================================================================== //
 
 static LRESULT CALLBACK _MniWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    ModernNotifyIcon *mni = NULL;
+    Mni4 *mni = NULL;
 
     if (uMsg == WM_NCCREATE) {
         LPCREATESTRUCT lpCreateStruct = (LPCREATESTRUCT)lParam;
 
-        mni = (ModernNotifyIcon *)lpCreateStruct->lpCreateParams;
-        SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)mni);
+        mni = (Mni4 *)lpCreateStruct->lpCreateParams;
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)mni);
         
         mni->window_handle = hWnd;
     } else {
-        mni = (ModernNotifyIcon *)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
+        mni = (Mni4 *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
     }
 
     if (mni) {
         return _MniDispatch(mni, hWnd, uMsg, wParam, lParam);
     }
 
-    return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 #pragma endregion
@@ -1189,7 +1247,7 @@ static LRESULT CALLBACK _MniWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 #pragma region Internal Methods
 
-static MniError _MniUpdateIcon(ModernNotifyIcon *mni, HICON icon) {
+static MniError _MniUpdateIcon(Mni4 *mni, HICON icon) {
     MNI_TRACE(L"_MniUpdateIcon(icon=%p), icon_created=%d", icon, mni->icon_created);
 
     if (mni->icon_created) {
@@ -1220,7 +1278,7 @@ static MniError _MniUpdateIcon(ModernNotifyIcon *mni, HICON icon) {
 
 // ========================================================================== //
 
-static MniError _MniUpdateMenu(ModernNotifyIcon *mni, HMENU menu) {
+static MniError _MniUpdateMenu(Mni4 *mni, HMENU menu) {
     MNI_TRACE(L"_MniUpdateMenu(menu=%p)", menu);
 
     UNREFERENCED_PARAMETER(menu);
@@ -1231,7 +1289,7 @@ static MniError _MniUpdateMenu(ModernNotifyIcon *mni, HMENU menu) {
 
 // ========================================================================== //
 
-static MniError _MniUpdateTip(ModernNotifyIcon *mni, const wchar_t *tip) {
+static MniError _MniUpdateTip(Mni4 *mni, const wchar_t *tip) {
     MNI_TRACE(L"_MniUpdateTip(tip=%p)", &tip);
 
     if (mni->icon_created) {
@@ -1262,7 +1320,7 @@ static MniError _MniUpdateTip(ModernNotifyIcon *mni, const wchar_t *tip) {
 
 // ========================================================================== //
 
-static MniError _MniInternalCreateWindow(ModernNotifyIcon *mni, MniInfo info) {
+static MniError _MniInternalCreateWindow(Mni4 *mni, MniInfo info) {
     MNI_TRACE(L"_MniInternalCreateWindow()");
 
     if (mni->window_handle != NULL) {
@@ -1270,18 +1328,27 @@ static MniError _MniInternalCreateWindow(ModernNotifyIcon *mni, MniInfo info) {
     }
 
     // Get module handle.
-    HINSTANCE hInstance = info.module_handle;
+    HINSTANCE hInstance = info.instance_handle;
     if (hInstance == NULL) {
-        hInstance = GetModuleHandleW(NULL);
+        hInstance = GetModuleHandle(NULL);
         if (hInstance == NULL) {
             return MNI_ERROR_INVALID_MODULE_HANDLE;
         }
     }
 
     // Init window class.
-    const wchar_t *class_name = L"MniWndClass";
+    wchar_t class_name[32];
+    memset(&class_name, 0, sizeof(class_name));
+
     if (info.class_name != NULL && info.class_name[0] != L'\0') {
-        class_name = info.class_name;
+        _StringCopyW(class_name, ARRAYSIZE(class_name), info.class_name);
+    } else {
+        const wchar_t def_name[] = L"MniWndClass_";
+        const int name_cch = ARRAYSIZE(def_name) - 1;
+
+        _StringCopyW(class_name, ARRAYSIZE(class_name), def_name);
+        _PtrToWideStringResult ptr_str = _PtrToWideString(mni, MNI_TRUE);
+        _StringCopyW(&class_name[name_cch], ARRAYSIZE(class_name) - name_cch, ptr_str.buf);
     }
 
     ATOM atom = 0;
@@ -1297,9 +1364,10 @@ static MniError _MniInternalCreateWindow(ModernNotifyIcon *mni, MniInfo info) {
             .hCursor        = NULL,
             .hbrBackground  = (HBRUSH)COLOR_WINDOW,
             .lpszMenuName   = NULL,
-            .lpszClassName  = class_name,
+            //.lpszClassName  = (LPCWSTR)&class_name,
             .hIconSm        = NULL
         };
+        wcex.lpszClassName = (LPCWSTR)&class_name;
 
         atom = RegisterClassExW(&wcex);
         if (atom == 0) {
@@ -1334,15 +1402,15 @@ static MniError _MniInternalCreateWindow(ModernNotifyIcon *mni, MniInfo info) {
     }
 
     mni->window_handle = hWnd;
-    mni->module_handle = hInstance;
-    mni->class_name = class_name;
+    mni->instance_handle = hInstance;
+    _StringCopyW(mni->class_name, ARRAYSIZE(mni->class_name), class_name);    
 
     return MNI_OK;
 }
 
 // ========================================================================== //
 
-static MniError _MniInternalDestroyWindow(ModernNotifyIcon *mni) {
+static MniError _MniInternalDestroyWindow(Mni4 *mni) {
     MNI_TRACE(L"_MniInternalDestroyWindow()");
 
     if (mni->window_handle == NULL) {
@@ -1352,14 +1420,14 @@ static MniError _MniInternalDestroyWindow(ModernNotifyIcon *mni) {
     DestroyWindow(mni->window_handle);
     mni->window_handle = NULL;
 
-    UnregisterClassW(mni->class_name, mni->module_handle);
+    UnregisterClassW(mni->class_name, mni->instance_handle);
     
     return MNI_OK;
 }
 
 // ========================================================================== //
 
-static MniError _MniInternalCreateNotifyIcon(ModernNotifyIcon *mni) {
+static MniError _MniInternalCreateNotifyIcon(Mni4 *mni) {
     MNI_TRACE(
         L"_MniInternalCreateNotifyIcon(), icon_created=%d, window_handle=%p",
         mni->icon_created,
@@ -1423,7 +1491,7 @@ static MniError _MniInternalCreateNotifyIcon(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-static MniError _MniInternalDestroyNotifyIcon(ModernNotifyIcon *mni) {
+static MniError _MniInternalDestroyNotifyIcon(Mni4 *mni) {
     MNI_TRACE(
         L"_MniInternalDestroyNotifyIcon(), icon_created=%d, window_handle=%p",
         mni->icon_created,
@@ -1461,9 +1529,9 @@ static MniError _MniInternalDestroyNotifyIcon(ModernNotifyIcon *mni) {
 
 #pragma region Public API
 
-MniError MniInit(ModernNotifyIcon *mni, MniInfo info) {
+MniError MniInit(Mni4 *mni, MniInfo info) {
     MNI_TRACE(L"MniInit(mni=%p) info={", mni);
-    MNI_TRACE(L"\t.module_handle=%p", info.module_handle);
+    MNI_TRACE(L"\t.instance_handle=%p", info.instance_handle);
     MNI_TRACE(L"\t.class_name=%p", info.class_name);
     MNI_TRACE(L"\t.guid=%p", &info.guid);
     MNI_TRACE(L"\t.icon=%p", info.icon);
@@ -1510,11 +1578,6 @@ MniError MniInit(ModernNotifyIcon *mni, MniInfo info) {
     
     memset(mni, 0, sizeof(*mni));
 
-    MniError ret = _MniInternalCreateWindow(mni, info);
-    if (MNI_FAILED(ret)) {
-        return ret;
-    }
-
     if (!_IsGuidEq(info.guid, MNI_GUID_NULL)) {
         mni->use_guid = MNI_TRUE;
         mni->guid = info.guid;
@@ -1536,13 +1599,12 @@ MniError MniInit(ModernNotifyIcon *mni, MniInfo info) {
     }
     mni->icm_style = info.icm_style;
     mni->icm_theme = info.icm_theme;
-    mni->dpi = _GetDpi(mni->window_handle);
 
-    mni->menu_position = info.menu_position;
-    mni->menu_animation = info.menu_animation;
+    mni->icm_position = info.icm_position;
+    mni->icm_animation = info.icm_animation;
 
-    mni->reserved1 = NULL;
-    mni->reserved2 = NULL;
+    mni->reserved1 = info.reserved1;
+    mni->reserved2 = info.reserved2;
 
     mni->user_data1 = info.user_data1;
     mni->user_data2 = info.user_data2;
@@ -1578,6 +1640,14 @@ MniError MniInit(ModernNotifyIcon *mni, MniInfo info) {
     mni->on_custom_message          = info.on_custom_message;
     mni->on_system_message          = info.on_system_message;
 
+    MniError ret = _MniInternalCreateWindow(mni, info);
+    if (MNI_FAILED(ret)) {            
+        memset(mni, 0, sizeof(*mni));
+        return ret;
+    }
+
+    mni->dpi = _GetDpi(mni->window_handle);
+
     if (mni->window_handle) {
         SendMessageW(mni->window_handle, WM_MNI_INIT, 0, 0);
     }
@@ -1587,7 +1657,7 @@ MniError MniInit(ModernNotifyIcon *mni, MniInfo info) {
 
 // ========================================================================== //
 
-MniError MniRelease(ModernNotifyIcon *mni, MniBool destroy_icon, MniBool destroy_menu) {
+MniError MniRelease(Mni4 *mni, MniBool destroy_icon, MniBool destroy_menu) {
     MNI_TRACE(L"MniRelease(mni=%p, destroy_icon=%d, destroy_menu=%d)", mni, destroy_icon, destroy_menu);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1617,7 +1687,7 @@ MniError MniRelease(ModernNotifyIcon *mni, MniBool destroy_icon, MniBool destroy
 
 // ========================================================================== //
 
-MniError MniShow(ModernNotifyIcon *mni, MniBool recreate) {
+MniError MniShow(Mni4 *mni, MniBool recreate) {
     MNI_TRACE(L"MniShow(mni=%p, recreate=%d)", mni, recreate);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1692,7 +1762,7 @@ MniError MniShow(ModernNotifyIcon *mni, MniBool recreate) {
 
 // ========================================================================== //
 
-MniError MniHide(ModernNotifyIcon *mni) {
+MniError MniHide(Mni4 *mni) {
     MNI_TRACE(L"MniHide(mni=%p)", mni);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1746,7 +1816,7 @@ MniError MniHide(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-MniError MniSetIcon(ModernNotifyIcon *mni, HICON icon, MniBool destroy_current) {
+MniError MniSetIcon(Mni4 *mni, HICON icon, MniBool destroy_current) {
     MNI_TRACE(L"MniSetIcon(mni=%p, icon=%p, destroy_current=%d)", mni, icon, destroy_current);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1775,7 +1845,7 @@ MniError MniSetIcon(ModernNotifyIcon *mni, HICON icon, MniBool destroy_current) 
 
 // ========================================================================== //
 
-MniError MniSetMenu(ModernNotifyIcon *mni, HMENU menu, MniBool destroy_current) {
+MniError MniSetMenu(Mni4 *mni, HMENU menu, MniBool destroy_current) {
     MNI_TRACE(L"MniSetMenu(mni=%p, menu=%p, destroy_current=%d)", mni, menu, destroy_current);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1804,7 +1874,7 @@ MniError MniSetMenu(ModernNotifyIcon *mni, HMENU menu, MniBool destroy_current) 
 
 // ========================================================================== //
 
-MniError MniSetTip(ModernNotifyIcon *mni, const wchar_t *tip) {
+MniError MniSetTip(Mni4 *mni, const wchar_t *tip) {
     MNI_TRACE(L"MniSetTip(mni=%p, tip=%p)", mni, tip);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1829,7 +1899,7 @@ MniError MniSetTip(ModernNotifyIcon *mni, const wchar_t *tip) {
 
 // ========================================================================== //
 
-MniError MniSetTipType(ModernNotifyIcon *mni, MniTipType mtt) {
+MniError MniSetTipType(Mni4 *mni, MniTipType mtt) {
     MNI_TRACE(L"MniSetTipType(mni=%p, mtt=%p)", mni, &mtt);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1860,7 +1930,7 @@ MniError MniSetTipType(ModernNotifyIcon *mni, MniTipType mtt) {
 
 // ========================================================================== //
 
-MniError MniGetIcon(ModernNotifyIcon *mni, HICON *icon) {
+MniError MniGetIcon(Mni4 *mni, HICON *icon) {
     MNI_TRACE(L"MniGetIcon(mni=%p, icon=%p)", mni, icon);
     MNI_ASSERT(mni && "mni ptr is null");
     
@@ -1879,7 +1949,7 @@ MniError MniGetIcon(ModernNotifyIcon *mni, HICON *icon) {
 
 // ========================================================================== //
 
-MniError MniGetMenu(ModernNotifyIcon *mni, HMENU *menu) {
+MniError MniGetMenu(Mni4 *mni, HMENU *menu) {
     MNI_TRACE(L"MniGetMenu(mni=%p, menu=%p)", mni, menu);
     MNI_ASSERT(mni && "mni ptr is null");
     
@@ -1898,7 +1968,7 @@ MniError MniGetMenu(ModernNotifyIcon *mni, HMENU *menu) {
 
 // ========================================================================== //
 
-MniError MniGetTip(ModernNotifyIcon *mni, wchar_t *buffer, int *len) {
+MniError MniGetTip(Mni4 *mni, wchar_t *buffer, int *len) {
     MNI_TRACE(L"MniGetTip(mni=%p, buffer=%p, len=%p)", mni, buffer, len);
     MNI_ASSERT(mni && "mni ptr is null");
     
@@ -1938,7 +2008,7 @@ MniError MniGetTip(ModernNotifyIcon *mni, wchar_t *buffer, int *len) {
 
 // ========================================================================== //
 
-MniError MniGetTipType(ModernNotifyIcon *mni, MniTipType *mtt) {
+MniError MniGetTipType(Mni4 *mni, MniTipType *mtt) {
     MNI_TRACE(L"MniGetTip(mni=%p, mtt=%p)", mni, mtt);
     MNI_ASSERT(mni && "mni ptr is null");
     
@@ -1957,7 +2027,7 @@ MniError MniGetTipType(ModernNotifyIcon *mni, MniTipType *mtt) {
 
 // ========================================================================== //
 
-MniError MniIsNotifyIconCreated(ModernNotifyIcon *mni, MniBool *is_created) {
+MniError MniIsNotifyIconCreated(Mni4 *mni, MniBool *is_created) {
     MNI_TRACE(L"MniIsNotifyIconCreated(mni=%p, is_create=%p)", mni, is_created);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1976,7 +2046,7 @@ MniError MniIsNotifyIconCreated(ModernNotifyIcon *mni, MniBool *is_created) {
 
 // ========================================================================== //
 
-MniError MniIsNotifyIconVisible(ModernNotifyIcon *mni, MniBool *is_visible) {
+MniError MniIsNotifyIconVisible(Mni4 *mni, MniBool *is_visible) {
     MNI_TRACE(L"MniIsNotifyIconVisible(mni=%p, is_visible=%p)", mni, is_visible);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -1995,7 +2065,7 @@ MniError MniIsNotifyIconVisible(ModernNotifyIcon *mni, MniBool *is_visible) {
 
 // ========================================================================== //
 
-MniError MniGetWindowHandle(ModernNotifyIcon *mni, HWND *window_handle) {
+MniError MniGetWindowHandle(Mni4 *mni, HWND *window_handle) {
     MNI_TRACE(L"MniGetWindowHandle(mni=%p, window_handle=%p)", mni, window_handle);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2014,26 +2084,26 @@ MniError MniGetWindowHandle(ModernNotifyIcon *mni, HWND *window_handle) {
 
 // ========================================================================== //
 
-MniError MniGetModuleHandle(ModernNotifyIcon *mni, HINSTANCE *module_handle) {
-    MNI_TRACE(L"MniGetModuleHandle(mni=%p, module_handle=%p)", mni, module_handle);
+MniError MniGetInstanceHandle(Mni4 *mni, HINSTANCE *instance_handle) {
+    MNI_TRACE(L"MniGetInstanceHandle(mni=%p, instance_handle=%p)", mni, instance_handle);
     MNI_ASSERT(mni && "mni ptr is null");
 
     if (!mni) {
         return MNI_ERROR_MNI_PTR_IS_NULL;
     }
 
-    if (!module_handle) {
+    if (!instance_handle) {
         return MNI_ERROR_INVALID_ARGUMENT;
     }
 
-    *module_handle = mni->module_handle;
+    *instance_handle = mni->instance_handle;
 
     return MNI_OK;
 }
 
 // ========================================================================== //
 
-MniError MniGetDpi(ModernNotifyIcon *mni, int *dpi) {
+MniError MniGetDpi(Mni4 *mni, int *dpi) {
     MNI_TRACE(L"MniGetDpi(mni=%p, dpi=%p)", mni, dpi);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2052,7 +2122,7 @@ MniError MniGetDpi(ModernNotifyIcon *mni, int *dpi) {
 
 // ========================================================================== //
 
-MniError MniGetSystemThemeInfo(ModernNotifyIcon *mni, MniThemeInfo *system_theme) {
+MniError MniGetSystemThemeInfo(Mni4 *mni, MniThemeInfo *system_theme) {
     MNI_TRACE(L"MniGetSystemThemeInfo(mni=%p, system_theme=%p)", mni, system_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2071,7 +2141,7 @@ MniError MniGetSystemThemeInfo(ModernNotifyIcon *mni, MniThemeInfo *system_theme
 
 // ========================================================================== //
 
-MniError MniGetAppsThemeInfo(ModernNotifyIcon *mni, MniThemeInfo *apps_theme) {
+MniError MniGetAppsThemeInfo(Mni4 *mni, MniThemeInfo *apps_theme) {
     MNI_TRACE(L"MniGetAppsThemeInfo(mni=%p, apps_theme=%p)", mni, apps_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2090,7 +2160,7 @@ MniError MniGetAppsThemeInfo(ModernNotifyIcon *mni, MniThemeInfo *apps_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmStyle(ModernNotifyIcon *mni, IcmStyle icm_style) {
+MNI_API MniError MniSetIcmStyle(Mni4 *mni, MniIcmStyle icm_style) {
     MNI_TRACE(L"MniSetIcmTheme(mni=%p, icm_style=%d)", mni, icm_style);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2105,7 +2175,7 @@ MNI_API MniError MniSetIcmStyle(ModernNotifyIcon *mni, IcmStyle icm_style) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmTheme(ModernNotifyIcon *mni, IcmTheme icm_theme) {
+MNI_API MniError MniSetIcmTheme(Mni4 *mni, MniIcmTheme icm_theme) {
     MNI_TRACE(L"MniSetIcmTheme(mni=%p, icm_theme=%d)", mni, icm_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2120,7 +2190,37 @@ MNI_API MniError MniSetIcmTheme(ModernNotifyIcon *mni, IcmTheme icm_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmStyle(ModernNotifyIcon *mni, IcmStyle *icm_style) {
+MNI_API MniError MniSetIcmPosition(Mni4 *mni, MniIcmPosition icm_pos) {
+    MNI_TRACE(L"MniSetIcmPosition(mni=%p, icm_pos=%d)", mni, icm_pos);
+    MNI_ASSERT(mni && "mni ptr is null");
+
+    if (!mni) {
+        return MNI_ERROR_MNI_PTR_IS_NULL;
+    }
+
+    mni->icm_position = icm_pos;
+
+    return MNI_OK;
+}
+
+// ========================================================================== //
+
+MNI_API MniError MniSetIcmAnimation(Mni4 *mni, MniIcmAnimation icm_anim) {
+    MNI_TRACE(L"MniSetIcmAnimation(mni=%p, icm_anim=%d)", mni, icm_anim);
+    MNI_ASSERT(mni && "mni ptr is null");
+
+    if (!mni) {
+        return MNI_ERROR_MNI_PTR_IS_NULL;
+    }
+
+    mni->icm_animation = icm_anim;
+
+    return MNI_OK;
+}
+
+// ========================================================================== //
+
+MNI_API MniError MniGetIcmStyle(Mni4 *mni, MniIcmStyle *icm_style) {
     MNI_TRACE(L"MniGetIcmStyle(mni=%p, icm_style=%p)", mni, icm_style);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2139,7 +2239,7 @@ MNI_API MniError MniGetIcmStyle(ModernNotifyIcon *mni, IcmStyle *icm_style) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmTheme(ModernNotifyIcon *mni, IcmTheme *icm_theme) {
+MNI_API MniError MniGetIcmTheme(Mni4 *mni, MniIcmTheme *icm_theme) {
     MNI_TRACE(L"MniGetIcmTheme(mni=%p, icm_theme=%p)", mni, icm_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2158,7 +2258,45 @@ MNI_API MniError MniGetIcmTheme(ModernNotifyIcon *mni, IcmTheme *icm_theme) {
 
 // ========================================================================== //
 
-MniError MniSetUserData1(ModernNotifyIcon *mni, void *data) {
+MNI_API MniError MniGetIcmPosition(Mni4 *mni, MniIcmPosition *icm_pos) {
+    MNI_TRACE(L"MniGetIcmPosition(mni=%p, icm_pos=%p)", mni, icm_pos);
+    MNI_ASSERT(mni && "mni ptr is null");
+
+    if (!mni) {
+        return MNI_ERROR_MNI_PTR_IS_NULL;
+    }
+
+    if (!icm_pos) {
+        return MNI_ERROR_INVALID_ARGUMENT;
+    }
+
+    *icm_pos = mni->icm_position;
+
+    return MNI_OK;
+}
+
+// ========================================================================== //
+
+MNI_API MniError MniGetIcmAnimation(Mni4 *mni, MniIcmAnimation *icm_anim) {
+    MNI_TRACE(L"MniGetIcmAnimation(mni=%p, icm_anim=%p)", mni, icm_anim);
+    MNI_ASSERT(mni && "mni ptr is null");
+
+    if (!mni) {
+        return MNI_ERROR_MNI_PTR_IS_NULL;
+    }
+
+    if (!icm_anim) {
+        return MNI_ERROR_INVALID_ARGUMENT;
+    }
+
+    *icm_anim = mni->icm_animation;
+
+    return MNI_OK;
+}
+
+// ========================================================================== //
+
+MniError MniSetUserData1(Mni4 *mni, void *data) {
     MNI_TRACE(L"MniSetUserData1(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2173,7 +2311,7 @@ MniError MniSetUserData1(ModernNotifyIcon *mni, void *data) {
 
 // ========================================================================== //
 
-MniError MniSetUserData2(ModernNotifyIcon *mni, void *data) {
+MniError MniSetUserData2(Mni4 *mni, void *data) {
     MNI_TRACE(L"MniSetUserData2(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2188,7 +2326,7 @@ MniError MniSetUserData2(ModernNotifyIcon *mni, void *data) {
 
 // ========================================================================== //
 
-MniError MniGetUserData1(ModernNotifyIcon *mni, void **data) {
+MniError MniGetUserData1(Mni4 *mni, void **data) {
     MNI_TRACE(L"MniGetUserData1(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2207,7 +2345,7 @@ MniError MniGetUserData1(ModernNotifyIcon *mni, void **data) {
 
 // ========================================================================== //
 
-MniError MniGetUserData2(ModernNotifyIcon *mni, void **data) {
+MniError MniGetUserData2(Mni4 *mni, void **data) {
     MNI_TRACE(L"MniGetUserData2(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2227,7 +2365,7 @@ MniError MniGetUserData2(ModernNotifyIcon *mni, void **data) {
 // ========================================================================== //
 
 MniError MniSendBalloonNotification(
-    ModernNotifyIcon        *mni,
+    Mni4                    *mni,
     const wchar_t           *title,
     const wchar_t           *text,
     MniBalloonIconType      icon_type,
@@ -2321,7 +2459,7 @@ MniError MniSendBalloonNotification(
 
 // ========================================================================== //
 
-MniError MniRemoveBalloonNotification(ModernNotifyIcon *mni) {
+MniError MniRemoveBalloonNotification(Mni4 *mni) {
     MNI_TRACE(L"MniRemoveBalloonNotification(mni=%p)", mni);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2355,7 +2493,7 @@ MniError MniRemoveBalloonNotification(ModernNotifyIcon *mni) {
 
 // ========================================================================== //
 
-MniError MniStartTimer(ModernNotifyIcon *mni, UINT timer_id, UINT interval) {
+MniError MniStartTimer(Mni4 *mni, unsigned int timer_id, unsigned int interval) {
     MNI_TRACE(L"MniStartTimer(mni=%p, timer_id=%d, interval=%d)", mni, timer_id, interval);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2367,7 +2505,7 @@ MniError MniStartTimer(ModernNotifyIcon *mni, UINT timer_id, UINT interval) {
         return MNI_ERROR_INVALID_WINDOW_HANDLE;
     }
 
-    if (timer_id < MNI_USER_TIMER_ID) {
+    if ((int)timer_id < MNI_USER_TIMER_ID) {
         return MNI_ERROR_INVALID_TIMER_ID;
     }
     
@@ -2381,7 +2519,7 @@ MniError MniStartTimer(ModernNotifyIcon *mni, UINT timer_id, UINT interval) {
 
 // ========================================================================== //
 
-MniError MniStopTimer(ModernNotifyIcon *mni, UINT timer_id) {
+MniError MniStopTimer(Mni4 *mni, unsigned int timer_id) {
     MNI_TRACE(L"MniStopTimer(mni=%p, timer_id=%d)", mni, timer_id);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2393,7 +2531,7 @@ MniError MniStopTimer(ModernNotifyIcon *mni, UINT timer_id) {
         return MNI_ERROR_INVALID_WINDOW_HANDLE;
     }
 
-    if (timer_id < MNI_USER_TIMER_ID) {
+    if ((int)timer_id < MNI_USER_TIMER_ID) {
         return MNI_ERROR_INVALID_TIMER_ID;
     }
     
@@ -2407,7 +2545,7 @@ MniError MniStopTimer(ModernNotifyIcon *mni, UINT timer_id) {
 
 // ========================================================================== //
 
-MniError MniSendCustomMessage(ModernNotifyIcon *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
+MniError MniSendCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE(L"MniSendCustomMessage(mni=%p, msg=%d, wParam=%p, lParam=%p)", mni, msg, wParam, lParam);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2433,7 +2571,7 @@ MniError MniSendCustomMessage(ModernNotifyIcon *mni, UINT msg, WPARAM wParam, LP
 
 // ========================================================================== //
 
-MniError MniPostCustomMessage(ModernNotifyIcon *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
+MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE(L"MniPostCustomMessage(mni=%p, msg=%d, wParam=%p, lParam=%p)", mni, msg, wParam, lParam);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2449,7 +2587,7 @@ MniError MniPostCustomMessage(ModernNotifyIcon *mni, UINT msg, WPARAM wParam, LP
     {
         BOOL ret = PostMessageW(mni->window_handle, msg, wParam, lParam);
         if (ret == FALSE) {
-            return MNI_ERROR_FAILED_TO_SEND_MESSAGE;
+            return MNI_ERROR_FAILED_TO_POST_MESSAGE;
         }
     }
     
@@ -2509,12 +2647,12 @@ int MniRunMessageLoop(void) {
     MSG msg;
 
     while (1) {
-        MniBool ret = GetMessage(&msg, NULL, 0, 0);
+        BOOL ret = GetMessage(&msg, NULL, 0, 0);
         if (ret == -1) {
             return -1;
         }
 
-        if (ret == MNI_FALSE) {
+        if (ret == FALSE) {
             break;
         } 
         
@@ -2534,7 +2672,7 @@ void MniQuit(void) {
 
 // ========================================================================== //
 
-MniError MniSetTipUTF8(ModernNotifyIcon *mni, const char *tip) {
+MniError MniSetTipUTF8(Mni4 *mni, const char *tip) {
     MNI_TRACE(L"MniSetTipUTF8(mni=%p, tip=%p)", mni, tip);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2558,7 +2696,7 @@ MniError MniSetTipUTF8(ModernNotifyIcon *mni, const char *tip) {
 
 // ========================================================================== //
 
-MniError MniGetTipUTF8(ModernNotifyIcon *mni, char *buffer, int *len) {
+MniError MniGetTipUTF8(Mni4 *mni, char *buffer, int *len) {
     MNI_TRACE(L"MniGetTipUTF8(mni=%p, buffer=%p, len=%p)", mni, buffer, len);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2612,7 +2750,7 @@ MniError MniGetTipUTF8(ModernNotifyIcon *mni, char *buffer, int *len) {
 // ========================================================================== //
 
 MniError MniSendBalloonNotificationUTF8(
-    ModernNotifyIcon        *mni,
+    Mni4                    *mni,
     const char              *title,
     const char              *text,
     MniBalloonIconType      icon_type,
