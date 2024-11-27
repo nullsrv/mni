@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\include\mni\mni.h" />
+    <ClCompile Include="..\src\mni.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\mni.c" />
+    <ClInclude Include="..\include\mni\mni.h" />
   </ItemGroup>
 </Project>
