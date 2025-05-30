@@ -43,9 +43,9 @@ extern "C" {
  */
 #define MNI_VERSION_MAJOR       4                       ///< Major version constant.
 #define MNI_VERSION_MINOR       0                       ///< Minor version constant.
-#define MNI_VERSION_REVISON     0                       ///< Revision version constant.
-#define MNI_VERSION             0x4000                  ///< Version number constant.
-#define MNI_VERSION_STRING      "4.0.0"                 ///< Version string.
+#define MNI_VERSION_REVISON     1                       ///< Revision version constant.
+#define MNI_VERSION             0x4001                  ///< Version number constant.
+#define MNI_VERSION_STRING      "4.0.1"                 ///< Version string.
 /** @} */
 
 /**

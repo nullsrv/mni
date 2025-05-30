@@ -49,6 +49,8 @@
 
 #define WM_APP_LAST                             (0xBFFF)
 
+#define MNI_INTERNAL_TIMER_START_ID             (UINT_PTR)(-16)
+
 #define TIMER_LMB_DOUBLE_CLICK_CHECK            (UINT_PTR)(-1)
 #define TIMER_PREVENT_DOUBLE_KEYSELECT          (UINT_PTR)(-2)
 
@@ -926,12 +928,12 @@ static MniBool _MniWmTaskbarCreated(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmUserTimerTimeout(Mni4 *mni, UINT id) {
+static MniBool _MniWmUserTimerTimeout(Mni4 *mni, UINT_PTR id) {
     MNI_TRACE(L"_MniWmUserTimerTimeout(id=%d)", id);
 
-    if (id >= MNI_USER_TIMER_ID) {
+    if (id < MNI_INTERNAL_TIMER_START_ID) {
         if (mni->on_timer) {
-            mni->on_timer(mni, id);
+            mni->on_timer(mni, (UINT)id);
         }
     }
 
@@ -940,10 +942,10 @@ static MniBool _MniWmUserTimerTimeout(Mni4 *mni, UINT id) {
 
 // ========================================================================== //
 
-static MniBool _MniWmInternalTimerTimeout(Mni4 *mni, UINT id) {
+static MniBool _MniWmInternalTimerTimeout(Mni4 *mni, UINT_PTR id) {
     MNI_TRACE(L"_MniWmInternalTimerTimeout(id=%d)", id);
 
-    if (id >= MNI_USER_TIMER_ID) {
+    if (id < MNI_INTERNAL_TIMER_START_ID) {
         return MNI_FALSE;
     }
 
@@ -1131,12 +1133,12 @@ static LRESULT _MniDispatch(Mni4 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
             break;
 
         case WM_TIMER:
-            if ((UINT)wParam >= MNI_USER_TIMER_ID) {
-                if (_MniWmUserTimerTimeout(mni, (UINT)wParam)) {
+            if ((UINT_PTR)wParam < MNI_INTERNAL_TIMER_START_ID) {
+                if (_MniWmUserTimerTimeout(mni, (UINT_PTR)wParam)) {
                     return 0;
                 }
             } else {
-                if (_MniWmInternalTimerTimeout(mni, (UINT)wParam)) {
+                if (_MniWmInternalTimerTimeout(mni, (UINT_PTR)wParam)) {
                     return 0;
                 }
             }
@@ -2505,7 +2507,7 @@ MniError MniStartTimer(Mni4 *mni, unsigned int timer_id, unsigned int interval) 
         return MNI_ERROR_INVALID_WINDOW_HANDLE;
     }
 
-    if ((int)timer_id < MNI_USER_TIMER_ID) {
+    if ((UINT_PTR)timer_id >= MNI_INTERNAL_TIMER_START_ID) {
         return MNI_ERROR_INVALID_TIMER_ID;
     }
     
@@ -2531,7 +2533,7 @@ MniError MniStopTimer(Mni4 *mni, unsigned int timer_id) {
         return MNI_ERROR_INVALID_WINDOW_HANDLE;
     }
 
-    if ((int)timer_id < MNI_USER_TIMER_ID) {
+    if ((UINT_PTR)timer_id >= MNI_INTERNAL_TIMER_START_ID) {
         return MNI_ERROR_INVALID_TIMER_ID;
     }
     
