@@ -101,6 +101,8 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAs>CompileAsC</CompileAs>
       <DisableSpecificWarnings>4204</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,6 +127,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <DisableSpecificWarnings>4204</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,6 +151,8 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAs>CompileAsC</CompileAs>
       <DisableSpecificWarnings>4204</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -172,6 +177,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <DisableSpecificWarnings>4204</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
