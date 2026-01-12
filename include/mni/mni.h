@@ -102,7 +102,7 @@ extern "C" {
 typedef int MniBool;
 
 // Forward declaration.
-struct Mni4;
+struct Mni5;
 
 /**
  * @enum MniError
@@ -256,42 +256,42 @@ typedef enum MniRdp {
  * @defgroup callbacks Callbacks prototypes.
  * @{
  */
-typedef void (*MniOnWindowCreateFn)         (struct Mni4 *mni);
-typedef void (*MniOnWindowDestroyFn)        (struct Mni4 *mni);
-typedef void (*MniOnInitFn)                 (struct Mni4 *mni);
-typedef void (*MniOnReleaseFn)              (struct Mni4 *mni);
-typedef void (*MniOnShowFn)                 (struct Mni4 *mni);
-typedef void (*MniOnHideFn)                 (struct Mni4 *mni);
-typedef void (*MniOnIconChangeFn)           (struct Mni4 *mni, HICON icon);
-typedef void (*MniOnMenuChangeFn)           (struct Mni4 *mni, HMENU menu);
-typedef void (*MniOnTipChangeFn)            (struct Mni4 *mni, const wchar_t *tip);
-typedef void (*MniOnTipTypeChangeFn)        (struct Mni4 *mni, MniTipType mtt);
-typedef void (*MniOnKeySelectFn)            (struct Mni4 *mni, int x, int y);
-typedef void (*MniOnLmbClickFn)             (struct Mni4 *mni, int x, int y);
-typedef void (*MniOnLmbDoubleClickFn)       (struct Mni4 *mni, int x, int y);
-typedef void (*MniOnMmbClickFn)             (struct Mni4 *mni, int x, int y);
-typedef void (*MniOnContextMenuOpenFn)      (struct Mni4 *mni);
-typedef void (*MniOnContextMenuItemClickFn) (struct Mni4 *mni, int selected_item);
-typedef void (*MniOnContextMenuCloseFn)     (struct Mni4 *mni, MniBool was_item_selected);
-typedef void (*MniOnBalloonShowFn)          (struct Mni4 *mni);
-typedef void (*MniOnBalloonHideFn)          (struct Mni4 *mni);
-typedef void (*MniOnBalloonTimeoutFn)       (struct Mni4 *mni);
-typedef void (*MniOnBalloonClickFn)         (struct Mni4 *mni);
-typedef void (*MniOnRichPopupOpenFn)        (struct Mni4 *mni, int x, int y);
-typedef void (*MniOnRichPopupCloseFn)       (struct Mni4 *mni);
-typedef void (*MniOnDpiChangeFn)            (struct Mni4 *mni, int dpi);
-typedef void (*MniOnSystemThemeChangeFn)    (struct Mni4 *mni, MniThemeInfo mti);
-typedef void (*MniOnAppsThemeChangeFn)      (struct Mni4 *mni, MniThemeInfo mti);
-typedef void (*MniOnTaskbarCreatedFn)       (struct Mni4 *mni);
-typedef void (*MniOnTimerFn)                (struct Mni4 *mni, unsigned int id);
+typedef void (*MniOnWindowCreateFn)         (struct Mni5 *mni);
+typedef void (*MniOnWindowDestroyFn)        (struct Mni5 *mni);
+typedef void (*MniOnInitFn)                 (struct Mni5 *mni);
+typedef void (*MniOnReleaseFn)              (struct Mni5 *mni);
+typedef void (*MniOnShowFn)                 (struct Mni5 *mni);
+typedef void (*MniOnHideFn)                 (struct Mni5 *mni);
+typedef void (*MniOnIconChangeFn)           (struct Mni5 *mni, HICON icon);
+typedef void (*MniOnMenuChangeFn)           (struct Mni5 *mni, HMENU menu);
+typedef void (*MniOnTipChangeFn)            (struct Mni5 *mni, const wchar_t *tip);
+typedef void (*MniOnTipTypeChangeFn)        (struct Mni5 *mni, MniTipType mtt);
+typedef void (*MniOnKeySelectFn)            (struct Mni5 *mni, int x, int y);
+typedef void (*MniOnLmbClickFn)             (struct Mni5 *mni, int x, int y);
+typedef void (*MniOnLmbDoubleClickFn)       (struct Mni5 *mni, int x, int y);
+typedef void (*MniOnMmbClickFn)             (struct Mni5 *mni, int x, int y);
+typedef void (*MniOnContextMenuOpenFn)      (struct Mni5 *mni);
+typedef void (*MniOnContextMenuItemClickFn) (struct Mni5 *mni, int selected_item);
+typedef void (*MniOnContextMenuCloseFn)     (struct Mni5 *mni, MniBool was_item_selected);
+typedef void (*MniOnBalloonShowFn)          (struct Mni5 *mni);
+typedef void (*MniOnBalloonHideFn)          (struct Mni5 *mni);
+typedef void (*MniOnBalloonTimeoutFn)       (struct Mni5 *mni);
+typedef void (*MniOnBalloonClickFn)         (struct Mni5 *mni);
+typedef void (*MniOnRichPopupOpenFn)        (struct Mni5 *mni, int x, int y);
+typedef void (*MniOnRichPopupCloseFn)       (struct Mni5 *mni);
+typedef void (*MniOnDpiChangeFn)            (struct Mni5 *mni, int dpi);
+typedef void (*MniOnSystemThemeChangeFn)    (struct Mni5 *mni, MniThemeInfo mti);
+typedef void (*MniOnAppsThemeChangeFn)      (struct Mni5 *mni, MniThemeInfo mti);
+typedef void (*MniOnTaskbarCreatedFn)       (struct Mni5 *mni);
+typedef void (*MniOnTimerFn)                (struct Mni5 *mni, unsigned int id);
 
-typedef void (*MniOnCustomMessageFn)(struct Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
-typedef BOOL (*MniOnSystemMessageFn)(struct Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
+typedef void (*MniOnCustomMessageFn)(struct Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
+typedef BOOL (*MniOnSystemMessageFn)(struct Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
 /** @} */
 
 /**
  * @struct MniInfo
- * @brief Information used to initialize Mni4.
+ * @brief Information used to initialize Mni5.
  */
 typedef struct MniInfo {
     HINSTANCE                   instance_handle;
@@ -346,10 +346,10 @@ typedef struct MniInfo {
 } MniInfo;
 
 /**
- * @struct Mni4
+ * @struct Mni5
  * @brief Structure representing icon in notification area.
  */
-typedef struct Mni4 {
+typedef struct Mni5 {
     HWND                        window_handle;
     HINSTANCE                   instance_handle;
     HICON                       icon;                   ///< icon handle
@@ -412,14 +412,14 @@ typedef struct Mni4 {
 } Mni5;
 
 /**
- * @brief       Initialize Mni4 structure.
+ * @brief       Initialize Mni5 structure.
  * @details     Perform all the initialization needed to create icon in notification area
  *              i.e. register window class, create invisible window and set some of the
  *              mni struct properties using info argument.
  *              Call this before any other calls.
  *              Note: this doesn't show the icon in notification area.
- * @param       mni             pointer to Mni4 struct
- * @param       info            information used to initialize Mni4 struct
+ * @param       mni             pointer to Mni5 struct
+ * @param       info            information used to initialize Mni5 struct
  * @return      status code, see #MniError
  */
 MNI_API MniError MniInit(Mni5 *mni, MniInfo info);
@@ -429,7 +429,7 @@ MNI_API MniError MniInit(Mni5 *mni, MniInfo info);
  * @details     Delete notify icon, destroy window, unregister class.
  *              If icon_rdp == MNI_RDP_AUTO, it will call DestroyIcon(mni->icon).
  *              If menu_rdp == MNI_RDP_AUTO, it will call DestroyMenu(mni->menu).
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @return      status code, see #MniError
  */
 MNI_API MniError MniRelease(Mni5 *mni);
@@ -437,7 +437,7 @@ MNI_API MniError MniRelease(Mni5 *mni);
 /**
  * @brief       Show the icon in notification area.
  * @details     
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       recreate        set to MNI_TRUE to recreate icon
  * @return      status code, see #MniError
  */
@@ -446,14 +446,14 @@ MNI_API MniError MniShow(Mni5 *mni, MniBool recreate);
 /**
  * @brief       Hide the icon in notification area.
  * @details     If icon is already hidden it returns #MNI_ICON_ALREADY_HIDDEN.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @return      status code, see #MniError
  */
 MNI_API MniError MniHide(Mni5 *mni);
 
 /**
  * @brief       Set icon that is visible in notification area.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       icon            handle to icon
  * @param       rdp             resource destruction policy
  * @return      status code, see #MniError
@@ -462,7 +462,7 @@ MNI_API MniError MniSetIcon(Mni5 *mni, HICON icon, MniRdp rdp);
 
 /**
  * @brief       Set menu that is used when right clicking on notify icon.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       icon            handle to menu
  * @param       rdp             resource destruction policy
  * @return      status code, see #MniError
@@ -471,8 +471,8 @@ MNI_API MniError MniSetMenu(Mni5 *mni, HMENU menu, MniRdp rdp);
 
 /**
  * @brief       Set tip that is visible in notification area.
- * @details     This is only displayed when Mni4::tip_type is set to #MNI_TIP_TYPE_STANDARD.
- * @param       mni             pointer to Mni4 struct
+ * @details     This is only displayed when Mni5::tip_type is set to #MNI_TIP_TYPE_STANDARD.
+ * @param       mni             pointer to Mni5 struct
  * @param       tip             pointer to string with new tip
  * @return      status code, see #MniError
  */
@@ -481,7 +481,7 @@ MNI_API MniError MniSetTip(Mni5 *mni, const wchar_t *tip);
 /**
  * @brief       Set tip type.
  * @details     See: #MniTipType.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       mtt             tip type
  * @return      status code, see #MniError
  */
@@ -489,7 +489,7 @@ MNI_API MniError MniSetTipType(Mni5 *mni, MniTipType mtt);
 
 /**
  * @brief       Get current icon handle.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  icon            pointer to HICON that receive icon handle
  * @return      status code, see #MniError
  */
@@ -497,7 +497,7 @@ MNI_API MniError MniGetIcon(Mni5 *mni, HICON *icon);
 
 /**
  * @brief       Get current menu handle.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  menu            pointer to HMENU that receive menu handle
  * @return      status code, see #MniError
  */
@@ -508,7 +508,7 @@ MNI_API MniError MniGetMenu(Mni5 *mni, HMENU *menu);
  * @remarks         If \p buffer != **NULL**, \p len indicate \p buffer size.
  * @remarks         If \p buffer == **NULL**, \p len receive required buffer length in
  *                  characters (including '\0').
- * @param           mni         pointer to Mni4 struct
+ * @param           mni         pointer to Mni5 struct
  * @param[out]      buffer      pointer to string that receive tip, see remarks
  * @param[in, out]  len         pointer to int, see remarks
  * @return          status code, see #MniError
@@ -517,7 +517,7 @@ MNI_API MniError MniGetTip(Mni5 *mni, wchar_t *buffer, int *len);
 
 /**
  * @brief       Get current tip type.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  mtt             pointer to MniTipType that receive current tip type
  * @return      status code, see #MniError
  */
@@ -525,7 +525,7 @@ MNI_API MniError MniGetTipType(Mni5 *mni, MniTipType *mtt);
 
 /**
  * @brief       Check if icon is created.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  is_created      pointer to MniBool that receive information
  * @return      status code, see #MniError
  */
@@ -533,7 +533,7 @@ MNI_API MniError MniIsNotifyIconCreated(Mni5 *mni, MniBool *is_created);
 
 /**
  * @brief       Check if icon is visible in.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  is_visible      pointer to MniBool that receive information
  * @return      status code, see #MniError
  */
@@ -541,7 +541,7 @@ MNI_API MniError MniIsNotifyIconVisible(Mni5 *mni, MniBool *is_visible);
 
 /**
  * @brief       Get handle of window that was used to create notify icon.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  window_handle   pointer to HWND that receive window handle
  * @return      status code, see #MniError
  */
@@ -549,7 +549,7 @@ MNI_API MniError MniGetWindowHandle(Mni5 *mni, HWND *window_handle);
 
 /**
  * @brief       Get handle of module instance that was used to create notify icon.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  window_handle   pointer to HINSTANCE that receive instance handle
  * @return      status code, see #MniError
  */
@@ -558,7 +558,7 @@ MNI_API MniError MniGetInstanceHandle(Mni5 *mni, HINSTANCE *instance_handle);
 /**
  * @brief       Get current system dpi.
  * @details     This value is dpi of primary monitor.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  dpi             pointer to int that receive dpi
  * @return  status code, see #MniError
  */
@@ -566,7 +566,7 @@ MNI_API MniError MniGetDpi(Mni5 *mni, int *dpi);
 
 /**
  * @brief       Get current system theme.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  system_theme    pointer to MniThemeInfo that receive theme information
  * @return      status code, see #MniError
  */
@@ -574,7 +574,7 @@ MNI_API MniError MniGetSystemThemeInfo(Mni5 *mni, MniThemeInfo *system_theme);
 
 /**
  * @brief       Get current application theme.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  system_theme    pointer to MniThemeInfo that receive theme information
  * @return      status code, see #MniError
  */
@@ -582,7 +582,7 @@ MNI_API MniError MniGetAppsThemeInfo(Mni5 *mni, MniThemeInfo *apps_theme);
 
 /**
  * @brief       Set style of context menu.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       icm_style       context menu style
  * @return      status code, see #MniError
  */
@@ -590,7 +590,7 @@ MNI_API MniError MniSetIcmStyle(Mni5 *mni, MniIcmStyle icm_style);
 
 /**
  * @brief       Set theme of context menu.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       icm_theme       context menu theme
  * @return      status code, see #MniError
  */
@@ -598,7 +598,7 @@ MNI_API MniError MniSetIcmTheme(Mni5 *mni, MniIcmTheme icm_theme);
 
 /**
  * @brief       Set position of where context menu will be shown.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       icm_pos         context menu position
  * @return      status code, see #MniError
  */
@@ -606,7 +606,7 @@ MNI_API MniError MniSetIcmPosition(Mni5 *mni, MniIcmPosition icm_pos);
 
 /**
  * @brief       Set animation of context menu.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       icm_anim        context menu animation
  * @return      status code, see #MniError
  */
@@ -614,7 +614,7 @@ MNI_API MniError MniSetIcmAnimation(Mni5 *mni, MniIcmAnimation icm_anim);
 
 /**
  * @brief       Get style of context menu.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  icm_style       pointer to MniIcmStyle that receive style
  * @return      status code, see #MniError
  */
@@ -622,7 +622,7 @@ MNI_API MniError MniGetIcmStyle(Mni5 *mni, MniIcmStyle *icm_style);
 
 /**
  * @brief       Get style of context menu.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  icm_theme       pointer to MniIcmTheme that receive theme
  * @return      status code, see #MniError
  */
@@ -630,7 +630,7 @@ MNI_API MniError MniGetIcmTheme(Mni5 *mni, MniIcmTheme *icm_theme);
 
 /**
  * @brief       Get position of where context menu will be shown.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  icm_pos         pointer to MniIcmPosition that receive position information
  * @return      status code, see #MniError
  */
@@ -638,27 +638,27 @@ MNI_API MniError MniGetIcmPosition(Mni5 *mni, MniIcmPosition *icm_pos);
 
 /**
  * @brief       Get animation of context menu.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  icm_anim        pointer to MniIcmAnimation that receive animation
  * @return      status code, see #MniError
  */
 MNI_API MniError MniGetIcmAnimation(Mni5 *mni, MniIcmAnimation *icm_anim);
 
 /**
- * @brief       Set first user data in Mni4 struct.
+ * @brief       Set first user data in Mni5 struct.
  * @details     Setting user data is useful if you want to access
  *              some information in callbacks.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       data            pointer to data
  * @return      status code, see #MniError
  */
 MNI_API MniError MniSetUserData1(Mni5 *mni, void *data);
 
 /**
- * @brief       Set second user data in Mni4 struct.
+ * @brief       Set second user data in Mni5 struct.
  * @details     Setting user data is useful if you want to access
  *              some information in callbacks.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       data            pointer to data
  * @return      status code, see #MniError
  */
@@ -666,7 +666,7 @@ MNI_API MniError MniSetUserData2(Mni5 *mni, void *data);
 
 /**
  * @brief       Get first user data.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  data            pointer to receive user data
  * @return      status code, see #MniError
  */
@@ -674,7 +674,7 @@ MNI_API MniError MniGetUserData1(Mni5 *mni, void **data);
 
 /**
  * @brief       Get first user data.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param[out]  data            pointer to receive user data
  * @return      status code, see #MniError
  */
@@ -682,7 +682,7 @@ MNI_API MniError MniGetUserData2(Mni5 *mni, void **data);
 
 /**
  * @brief       Send balloon notification.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       title           notification title
  * @param       title           notification content
  * @param       icon_type       notification icon
@@ -701,14 +701,14 @@ MNI_API MniError MniSendBalloonNotification(
 
 /**
  * @brief       Remove notification.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @return      status code, see #MniError
  */
 MNI_API MniError MniRemoveBalloonNotification(Mni5 *mni);
 
 /**
  * @brief       Start timer.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       timer_id        timer id
  * @param       interval        timer timeout interval
  * @return      status code, see #MniError
@@ -717,7 +717,7 @@ MNI_API MniError MniStartTimer(Mni5 *mni, unsigned int timer_id, unsigned int in
 
 /**
  * @brief       Stop timer.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       timer_id        timer id
  * @return      status code, see #MniError
  */
@@ -727,7 +727,7 @@ MNI_API MniError MniStopTimer(Mni5 *mni, unsigned int timer_id);
  * @brief       Send custom massage to queue.
  * @details     If calling thread is the same as window creation thread then blocks.
  *              If calling thread is different then return immediately.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       msg             message id
  * @param       wParam          message specific information
  * @param       lParam          message specific information
@@ -737,7 +737,7 @@ MNI_API MniError MniSendCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM
 
 /**
  * @brief       Post custom massage to queue and return immediately.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       msg             message id
  * @param       wParam          message specific information
  * @param       lParam          message specific information
@@ -747,7 +747,7 @@ MNI_API MniError MniPostCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM
 
 /**
  * @brief       Gets the screen coordinates of the bounding rectangle of a notification icon.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       pRect           pointer that receive icon coordinates
  * @return      status code, see #MniError
  */
@@ -773,7 +773,7 @@ MNI_API void MniQuit(void);
 
 /**
  * @brief       Set notify icon tip using UTF-8 string.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       tip             tip text
  * @return      status code, see #MniError
  */
@@ -784,7 +784,7 @@ MNI_API MniError MniSetTipUTF8(Mni5 *mni, const char *tip);
  * @remarks         If \p buffer != **NULL**, \p len indicate \p buffer size.
  * @remarks         If \p buffer == **NULL**, \p len receive required buffer length in
  *                  characters (including '\0').
- * @param           mni         pointer to Mni4 struct
+ * @param           mni         pointer to Mni5 struct
  * @param[out]      buffer      pointer to string that receive tip, see remarks
  * @param[in, out]  len         pointer to int, see remarks
  * @return          status code, see #MniError
@@ -793,7 +793,7 @@ MNI_API MniError MniGetTipUTF8(Mni5 *mni, char *buffer, int *len);
 
 /**
  * @brief       Send balloon notification using UTF-8 string.
- * @param       mni             pointer to Mni4 struct
+ * @param       mni             pointer to Mni5 struct
  * @param       title           notification title
  * @param       title           notification content
  * @param       icon_type       notification icon

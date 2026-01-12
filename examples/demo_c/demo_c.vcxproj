@@ -99,7 +99,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(PlatformShortName)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mni4dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mni5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)..\manifest\DpiAwareV2.manifest</AdditionalManifestFiles>
@@ -121,7 +121,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(PlatformShortName)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mni4dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mni5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)..\manifest\DpiAwareV2.manifest</AdditionalManifestFiles>
@@ -139,7 +139,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(PlatformShortName)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mni4dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mni5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)..\manifest\DpiAwareV2.manifest</AdditionalManifestFiles>
@@ -161,7 +161,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(PlatformShortName)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mni4dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mni5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)..\manifest\DpiAwareV2.manifest</AdditionalManifestFiles>
