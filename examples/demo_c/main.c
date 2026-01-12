@@ -283,8 +283,8 @@ void OnInit(Mni4 *MNI) {
 
     HICON ico = _LoadIcon(MNI->system_theme, MNI->dpi);
 
-    MniSetIcon(MNI, ico, MNI_FALSE);
-    MniSetMenu(MNI, demo->menu_popup, MNI_FALSE);
+    MniSetIcon(MNI, ico, MNI_RDP_AUTO);
+    MniSetMenu(MNI, demo->menu_popup, MNI_RDP_AUTO);
     MniSetTip(MNI, L"Demo Tip");
 }
 
@@ -329,13 +329,13 @@ void OnTaskbarCreated(Mni4 *MNI) {
 void OnDpiChange(Mni4 *MNI, int dpi) {
     // Load icon with updated size.
     HICON ico = _LoadIcon(MNI->system_theme, dpi);
-    MniSetIcon(MNI, ico, MNI_TRUE);
+    MniSetIcon(MNI, ico, MNI_RDP_AUTO);
 }
 
 void OnSystemThemeChange(Mni4 *MNI, MniThemeInfo mti) {
     // Load icon depending on theme.
     HICON ico = _LoadIcon(mti, MNI->dpi);
-    MniSetIcon(MNI, ico, TRUE);
+    MniSetIcon(MNI, ico, MNI_RDP_AUTO);
 }
 
 void OnTimer(Mni4 *MNI, unsigned int timer_id) {
@@ -574,7 +574,7 @@ int WINAPI wWinMain(
     }
 
     int r = MniRunMessageLoop();
-    MniRelease(&mni, MNI_TRUE, MNI_TRUE);
+    MniRelease(&mni);
 
     return r;
 }

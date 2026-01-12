@@ -243,6 +243,15 @@ typedef enum MniIcmAnimation {
 } MniIcmAnimation;
 
 /**
+* @enum MniRdp
+* @brief Resource destruction policy.
+*/
+typedef enum MniRdp {
+    MNI_RDP_AUTO                            = 0,        ///< Automatically destroy resource.
+    MNI_RDP_MANUAL                          = 1,        ///< Manually destroy resource.
+} MniRdp;
+
+/**
  * @defgroup callbacks Callbacks prototypes.
  * @{
  */
@@ -352,6 +361,8 @@ typedef struct Mni4 {
     MniThemeInfo                apps_theme;
     MniIcmStyle                 icm_style;
     MniIcmTheme                 icm_theme;
+    MniRdp                      icon_rdp;
+    MniRdp                      menu_rdp;
     int                         dpi;
     MniBool                     icon_created;
     MniBool                     icon_visible;
@@ -415,14 +426,12 @@ MNI_API MniError MniInit(Mni4 *mni, MniInfo info);
 /**
  * @brief       Release all the resources.
  * @details     Delete notify icon, destroy window, unregister class.
- *              If destroy_icon is set to MNI_TRUE call DestroyIcon(mni->icon).
- *              If destroy_menu is set to MNI_TRUE call DestroyMenu(mni->menu).
+ *              If icon_rdp == MNI_RDP_AUTO, it will call DestroyIcon(mni->icon).
+ *              If menu_rdp == MNI_RDP_AUTO, it will call DestroyMenu(mni->menu).
  * @param       mni             pointer to Mni4 struct
- * @param       destroy_icon    set to MNI_TRUE to release Mni4::icon
- * @param       destroy_menu    set to MNI_TRUE to release Mni4::menu
  * @return      status code, see #MniError
  */
-MNI_API MniError MniRelease(Mni4 *mni, MniBool destroy_icon, MniBool destroy_menu);
+MNI_API MniError MniRelease(Mni4 *mni);
 
 /**
  * @brief       Show the icon in notification area.
@@ -445,19 +454,19 @@ MNI_API MniError MniHide(Mni4 *mni);
  * @brief       Set icon that is visible in notification area.
  * @param       mni             pointer to Mni4 struct
  * @param       icon            handle to icon
- * @param       destroy_current destroy current icon before setting new one
+ * @param       rdp             resource destruction policy
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetIcon(Mni4 *mni, HICON icon, MniBool destroy_current);
+MNI_API MniError MniSetIcon(Mni4 *mni, HICON icon, MniRdp rdp);
 
 /**
  * @brief       Set menu that is used when right clicking on notify icon.
  * @param       mni             pointer to Mni4 struct
  * @param       icon            handle to menu
- * @param       destroy_current destroy current menu before setting new one
+ * @param       rdp             resource destruction policy
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetMenu(Mni4 *mni, HMENU menu, MniBool destroy_current);
+MNI_API MniError MniSetMenu(Mni4 *mni, HMENU menu, MniRdp rdp);
 
 /**
  * @brief       Set tip that is visible in notification area.
@@ -2387,6 +2396,9 @@ MniError MniInit(Mni4 *mni, MniInfo info) {
     mni->icm_position = info.icm_position;
     mni->icm_animation = info.icm_animation;
 
+    mni->icon_rdp = MNI_RDP_AUTO;
+    mni->menu_rdp = MNI_RDP_AUTO;
+
     mni->reserved1 = info.reserved1;
     mni->reserved2 = info.reserved2;
 
@@ -2441,8 +2453,8 @@ MniError MniInit(Mni4 *mni, MniInfo info) {
 
 // ========================================================================== //
 
-MniError MniRelease(Mni4 *mni, MniBool destroy_icon, MniBool destroy_menu) {
-    MNI_TRACE(L"MniRelease(mni=%p, destroy_icon=%d, destroy_menu=%d)", mni, destroy_icon, destroy_menu);
+MniError MniRelease(Mni4 *mni) {
+    MNI_TRACE(L"MniRelease(mni=%p)", mni);
     MNI_ASSERT(mni && "mni ptr is null");
 
     if (!mni) {
@@ -2456,11 +2468,11 @@ MniError MniRelease(Mni4 *mni, MniBool destroy_icon, MniBool destroy_menu) {
     _MniInternalDestroyNotifyIcon(mni);
     _MniInternalDestroyWindow(mni);
 
-    if (destroy_icon && mni->icon) {
+    if (mni->icon_rdp == MNI_RDP_AUTO && mni->icon) {
         DestroyIcon(mni->icon);
     }
 
-    if (destroy_menu && mni->menu) {
+    if (mni->menu_rdp == MNI_RDP_AUTO && mni->menu) {
         DestroyMenu(mni->menu);
     }
 
@@ -2600,8 +2612,8 @@ MniError MniHide(Mni4 *mni) {
 
 // ========================================================================== //
 
-MniError MniSetIcon(Mni4 *mni, HICON icon, MniBool destroy_current) {
-    MNI_TRACE(L"MniSetIcon(mni=%p, icon=%p, destroy_current=%d)", mni, icon, destroy_current);
+MniError MniSetIcon(Mni4 *mni, HICON icon, MniRdp rdp) {
+    MNI_TRACE(L"MniSetIcon(mni=%p, icon=%p, rdp=%d)", mni, icon, rdp);
     MNI_ASSERT(mni && "mni ptr is null");
 
     if (!mni) {
@@ -2617,11 +2629,12 @@ MniError MniSetIcon(Mni4 *mni, HICON icon, MniBool destroy_current) {
 
         SendMessageW(mni->window_handle, WM_MNI_ICON_CHANGE, (WPARAM)icon, 0);
 
-        if (mni->icon && destroy_current) {
+        if (mni->icon_rdp == MNI_RDP_AUTO && mni->icon != NULL) {
             DestroyIcon(mni->icon);
         }
 
         mni->icon = icon;
+        mni->icon_rdp = rdp;
     }
 
     return MNI_OK;
@@ -2629,8 +2642,8 @@ MniError MniSetIcon(Mni4 *mni, HICON icon, MniBool destroy_current) {
 
 // ========================================================================== //
 
-MniError MniSetMenu(Mni4 *mni, HMENU menu, MniBool destroy_current) {
-    MNI_TRACE(L"MniSetMenu(mni=%p, menu=%p, destroy_current=%d)", mni, menu, destroy_current);
+MniError MniSetMenu(Mni4 *mni, HMENU menu, MniRdp rdp) {
+    MNI_TRACE(L"MniSetMenu(mni=%p, menu=%p, rdp=%d)", mni, menu, rdp);
     MNI_ASSERT(mni && "mni ptr is null");
 
     if (!mni) {
@@ -2646,11 +2659,12 @@ MniError MniSetMenu(Mni4 *mni, HMENU menu, MniBool destroy_current) {
 
         SendMessageW(mni->window_handle, WM_MNI_MENU_CHANGE, (WPARAM)menu, 0);
 
-        if (mni->menu && destroy_current) {
+        if (mni->menu_rdp == MNI_RDP_AUTO && mni->menu != NULL) {
             DestroyMenu(mni->menu);
         }
 
         mni->menu = menu;
+        mni->menu_rdp = rdp;
     }
 
     return MNI_OK;
