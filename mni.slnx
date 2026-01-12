@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="examples/demo_c/demo_c.vcxproj" Id="afd8eb0a-e047-4663-bc34-c49149ef3ce6">
+    <BuildDependency Project="proj/mni_dll.vcxproj" />
+  </Project>
+  <Project Path="proj/mni_dll.vcxproj" Id="32bff794-e600-4b9b-9c47-f95d8594bdca" />
+</Solution>

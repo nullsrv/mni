@@ -1,3 +1,4 @@
+#define MNI_USE_DLL
 #include <mni/mni.h>
 
 #define WIN32_LEAN_AND_MEAN

@@ -23,7 +23,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "mni.h"
+#include "../include/mni/mni.h"
 
 #include <shellapi.h>       // Shell_NotifyIconW
 
