@@ -686,7 +686,7 @@ MNI_API MniError MniGetUserData2(Mni4 *mni, void **data);
  * @param       title           notification content
  * @param       icon_type       notification icon
  * @param       icon            handle to icon (or **NULL**)
- * @param       flags           notificaion flags
+ * @param       flags           notification flags
  * @return      status code, see #MniError
  */
 MNI_API MniError MniSendBalloonNotification(
@@ -699,7 +699,7 @@ MNI_API MniError MniSendBalloonNotification(
 );
 
 /**
- * @brief       Remove notificaion.
+ * @brief       Remove notification.
  * @param       mni             pointer to Mni4 struct
  * @return      status code, see #MniError
  */
@@ -789,7 +789,7 @@ MNI_API MniError MniGetTipUTF8(Mni4 *mni, char *buffer, int *len);
  * @param       title           notification content
  * @param       icon_type       notification icon
  * @param       icon            handle to icon (or **NULL**)
- * @param       flags           notificaion flags
+ * @param       flags           notification flags
  * @return      status code, see #MniError
  */
 MNI_API MniError MniSendBalloonNotificationUTF8(
