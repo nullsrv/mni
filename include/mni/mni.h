@@ -41,11 +41,11 @@ extern "C" {
  * @defgroup version Version information.
  * @{
  */
-#define MNI_VERSION_MAJOR       4                       ///< Major version constant.
+#define MNI_VERSION_MAJOR       5                       ///< Major version constant.
 #define MNI_VERSION_MINOR       0                       ///< Minor version constant.
-#define MNI_VERSION_REVISON     1                       ///< Revision version constant.
-#define MNI_VERSION             0x4001                  ///< Version number constant.
-#define MNI_VERSION_STRING      "4.0.1"                 ///< Version string.
+#define MNI_VERSION_REVISON     0                       ///< Revision version constant.
+#define MNI_VERSION             0x5000                  ///< Version number constant.
+#define MNI_VERSION_STRING      "5.0.0"                 ///< Version string.
 /** @} */
 
 /**
@@ -409,7 +409,7 @@ typedef struct Mni4 {
     MniOnTimerFn                on_timer;
     MniOnCustomMessageFn        on_custom_message;
     MniOnSystemMessageFn        on_system_message;
-} Mni4;
+} Mni5;
 
 /**
  * @brief       Initialize Mni4 structure.
@@ -422,7 +422,7 @@ typedef struct Mni4 {
  * @param       info            information used to initialize Mni4 struct
  * @return      status code, see #MniError
  */
-MNI_API MniError MniInit(Mni4 *mni, MniInfo info);
+MNI_API MniError MniInit(Mni5 *mni, MniInfo info);
 
 /**
  * @brief       Release all the resources.
@@ -432,7 +432,7 @@ MNI_API MniError MniInit(Mni4 *mni, MniInfo info);
  * @param       mni             pointer to Mni4 struct
  * @return      status code, see #MniError
  */
-MNI_API MniError MniRelease(Mni4 *mni);
+MNI_API MniError MniRelease(Mni5 *mni);
 
 /**
  * @brief       Show the icon in notification area.
@@ -441,7 +441,7 @@ MNI_API MniError MniRelease(Mni4 *mni);
  * @param       recreate        set to MNI_TRUE to recreate icon
  * @return      status code, see #MniError
  */
-MNI_API MniError MniShow(Mni4 *mni, MniBool recreate);
+MNI_API MniError MniShow(Mni5 *mni, MniBool recreate);
 
 /**
  * @brief       Hide the icon in notification area.
@@ -449,7 +449,7 @@ MNI_API MniError MniShow(Mni4 *mni, MniBool recreate);
  * @param       mni             pointer to Mni4 struct
  * @return      status code, see #MniError
  */
-MNI_API MniError MniHide(Mni4 *mni);
+MNI_API MniError MniHide(Mni5 *mni);
 
 /**
  * @brief       Set icon that is visible in notification area.
@@ -458,7 +458,7 @@ MNI_API MniError MniHide(Mni4 *mni);
  * @param       rdp             resource destruction policy
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetIcon(Mni4 *mni, HICON icon, MniRdp rdp);
+MNI_API MniError MniSetIcon(Mni5 *mni, HICON icon, MniRdp rdp);
 
 /**
  * @brief       Set menu that is used when right clicking on notify icon.
@@ -467,7 +467,7 @@ MNI_API MniError MniSetIcon(Mni4 *mni, HICON icon, MniRdp rdp);
  * @param       rdp             resource destruction policy
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetMenu(Mni4 *mni, HMENU menu, MniRdp rdp);
+MNI_API MniError MniSetMenu(Mni5 *mni, HMENU menu, MniRdp rdp);
 
 /**
  * @brief       Set tip that is visible in notification area.
@@ -476,7 +476,7 @@ MNI_API MniError MniSetMenu(Mni4 *mni, HMENU menu, MniRdp rdp);
  * @param       tip             pointer to string with new tip
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetTip(Mni4 *mni, const wchar_t *tip);
+MNI_API MniError MniSetTip(Mni5 *mni, const wchar_t *tip);
 
 /**
  * @brief       Set tip type.
@@ -485,7 +485,7 @@ MNI_API MniError MniSetTip(Mni4 *mni, const wchar_t *tip);
  * @param       mtt             tip type
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetTipType(Mni4 *mni, MniTipType mtt);
+MNI_API MniError MniSetTipType(Mni5 *mni, MniTipType mtt);
 
 /**
  * @brief       Get current icon handle.
@@ -493,7 +493,7 @@ MNI_API MniError MniSetTipType(Mni4 *mni, MniTipType mtt);
  * @param[out]  icon            pointer to HICON that receive icon handle
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetIcon(Mni4 *mni, HICON *icon);
+MNI_API MniError MniGetIcon(Mni5 *mni, HICON *icon);
 
 /**
  * @brief       Get current menu handle.
@@ -501,7 +501,7 @@ MNI_API MniError MniGetIcon(Mni4 *mni, HICON *icon);
  * @param[out]  menu            pointer to HMENU that receive menu handle
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetMenu(Mni4 *mni, HMENU *menu);
+MNI_API MniError MniGetMenu(Mni5 *mni, HMENU *menu);
 
 /**
  * @brief           Get current tip string.
@@ -513,7 +513,7 @@ MNI_API MniError MniGetMenu(Mni4 *mni, HMENU *menu);
  * @param[in, out]  len         pointer to int, see remarks
  * @return          status code, see #MniError
  */
-MNI_API MniError MniGetTip(Mni4 *mni, wchar_t *buffer, int *len);
+MNI_API MniError MniGetTip(Mni5 *mni, wchar_t *buffer, int *len);
 
 /**
  * @brief       Get current tip type.
@@ -521,7 +521,7 @@ MNI_API MniError MniGetTip(Mni4 *mni, wchar_t *buffer, int *len);
  * @param[out]  mtt             pointer to MniTipType that receive current tip type
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetTipType(Mni4 *mni, MniTipType *mtt);
+MNI_API MniError MniGetTipType(Mni5 *mni, MniTipType *mtt);
 
 /**
  * @brief       Check if icon is created.
@@ -529,7 +529,7 @@ MNI_API MniError MniGetTipType(Mni4 *mni, MniTipType *mtt);
  * @param[out]  is_created      pointer to MniBool that receive information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniIsNotifyIconCreated(Mni4 *mni, MniBool *is_created);
+MNI_API MniError MniIsNotifyIconCreated(Mni5 *mni, MniBool *is_created);
 
 /**
  * @brief       Check if icon is visible in.
@@ -537,7 +537,7 @@ MNI_API MniError MniIsNotifyIconCreated(Mni4 *mni, MniBool *is_created);
  * @param[out]  is_visible      pointer to MniBool that receive information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniIsNotifyIconVisible(Mni4 *mni, MniBool *is_visible);
+MNI_API MniError MniIsNotifyIconVisible(Mni5 *mni, MniBool *is_visible);
 
 /**
  * @brief       Get handle of window that was used to create notify icon.
@@ -545,7 +545,7 @@ MNI_API MniError MniIsNotifyIconVisible(Mni4 *mni, MniBool *is_visible);
  * @param[out]  window_handle   pointer to HWND that receive window handle
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetWindowHandle(Mni4 *mni, HWND *window_handle);
+MNI_API MniError MniGetWindowHandle(Mni5 *mni, HWND *window_handle);
 
 /**
  * @brief       Get handle of module instance that was used to create notify icon.
@@ -553,7 +553,7 @@ MNI_API MniError MniGetWindowHandle(Mni4 *mni, HWND *window_handle);
  * @param[out]  window_handle   pointer to HINSTANCE that receive instance handle
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetInstanceHandle(Mni4 *mni, HINSTANCE *instance_handle);
+MNI_API MniError MniGetInstanceHandle(Mni5 *mni, HINSTANCE *instance_handle);
 
 /**
  * @brief       Get current system dpi.
@@ -562,7 +562,7 @@ MNI_API MniError MniGetInstanceHandle(Mni4 *mni, HINSTANCE *instance_handle);
  * @param[out]  dpi             pointer to int that receive dpi
  * @return  status code, see #MniError
  */
-MNI_API MniError MniGetDpi(Mni4 *mni, int *dpi);
+MNI_API MniError MniGetDpi(Mni5 *mni, int *dpi);
 
 /**
  * @brief       Get current system theme.
@@ -570,7 +570,7 @@ MNI_API MniError MniGetDpi(Mni4 *mni, int *dpi);
  * @param[out]  system_theme    pointer to MniThemeInfo that receive theme information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetSystemThemeInfo(Mni4 *mni, MniThemeInfo *system_theme);
+MNI_API MniError MniGetSystemThemeInfo(Mni5 *mni, MniThemeInfo *system_theme);
 
 /**
  * @brief       Get current application theme.
@@ -578,7 +578,7 @@ MNI_API MniError MniGetSystemThemeInfo(Mni4 *mni, MniThemeInfo *system_theme);
  * @param[out]  system_theme    pointer to MniThemeInfo that receive theme information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetAppsThemeInfo(Mni4 *mni, MniThemeInfo *apps_theme);
+MNI_API MniError MniGetAppsThemeInfo(Mni5 *mni, MniThemeInfo *apps_theme);
 
 /**
  * @brief       Set style of context menu.
@@ -586,7 +586,7 @@ MNI_API MniError MniGetAppsThemeInfo(Mni4 *mni, MniThemeInfo *apps_theme);
  * @param       icm_style       context menu style
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetIcmStyle(Mni4 *mni, MniIcmStyle icm_style);
+MNI_API MniError MniSetIcmStyle(Mni5 *mni, MniIcmStyle icm_style);
 
 /**
  * @brief       Set theme of context menu.
@@ -594,7 +594,7 @@ MNI_API MniError MniSetIcmStyle(Mni4 *mni, MniIcmStyle icm_style);
  * @param       icm_theme       context menu theme
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetIcmTheme(Mni4 *mni, MniIcmTheme icm_theme);
+MNI_API MniError MniSetIcmTheme(Mni5 *mni, MniIcmTheme icm_theme);
 
 /**
  * @brief       Set position of where context menu will be shown.
@@ -602,7 +602,7 @@ MNI_API MniError MniSetIcmTheme(Mni4 *mni, MniIcmTheme icm_theme);
  * @param       icm_pos         context menu position
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetIcmPosition(Mni4 *mni, MniIcmPosition icm_pos);
+MNI_API MniError MniSetIcmPosition(Mni5 *mni, MniIcmPosition icm_pos);
 
 /**
  * @brief       Set animation of context menu.
@@ -610,7 +610,7 @@ MNI_API MniError MniSetIcmPosition(Mni4 *mni, MniIcmPosition icm_pos);
  * @param       icm_anim        context menu animation
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetIcmAnimation(Mni4 *mni, MniIcmAnimation icm_anim);
+MNI_API MniError MniSetIcmAnimation(Mni5 *mni, MniIcmAnimation icm_anim);
 
 /**
  * @brief       Get style of context menu.
@@ -618,7 +618,7 @@ MNI_API MniError MniSetIcmAnimation(Mni4 *mni, MniIcmAnimation icm_anim);
  * @param[out]  icm_style       pointer to MniIcmStyle that receive style
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetIcmStyle(Mni4 *mni, MniIcmStyle *icm_style);
+MNI_API MniError MniGetIcmStyle(Mni5 *mni, MniIcmStyle *icm_style);
 
 /**
  * @brief       Get style of context menu.
@@ -626,7 +626,7 @@ MNI_API MniError MniGetIcmStyle(Mni4 *mni, MniIcmStyle *icm_style);
  * @param[out]  icm_theme       pointer to MniIcmTheme that receive theme
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetIcmTheme(Mni4 *mni, MniIcmTheme *icm_theme);
+MNI_API MniError MniGetIcmTheme(Mni5 *mni, MniIcmTheme *icm_theme);
 
 /**
  * @brief       Get position of where context menu will be shown.
@@ -634,7 +634,7 @@ MNI_API MniError MniGetIcmTheme(Mni4 *mni, MniIcmTheme *icm_theme);
  * @param[out]  icm_pos         pointer to MniIcmPosition that receive position information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetIcmPosition(Mni4 *mni, MniIcmPosition *icm_pos);
+MNI_API MniError MniGetIcmPosition(Mni5 *mni, MniIcmPosition *icm_pos);
 
 /**
  * @brief       Get animation of context menu.
@@ -642,7 +642,7 @@ MNI_API MniError MniGetIcmPosition(Mni4 *mni, MniIcmPosition *icm_pos);
  * @param[out]  icm_anim        pointer to MniIcmAnimation that receive animation
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetIcmAnimation(Mni4 *mni, MniIcmAnimation *icm_anim);
+MNI_API MniError MniGetIcmAnimation(Mni5 *mni, MniIcmAnimation *icm_anim);
 
 /**
  * @brief       Set first user data in Mni4 struct.
@@ -652,7 +652,7 @@ MNI_API MniError MniGetIcmAnimation(Mni4 *mni, MniIcmAnimation *icm_anim);
  * @param       data            pointer to data
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetUserData1(Mni4 *mni, void *data);
+MNI_API MniError MniSetUserData1(Mni5 *mni, void *data);
 
 /**
  * @brief       Set second user data in Mni4 struct.
@@ -662,7 +662,7 @@ MNI_API MniError MniSetUserData1(Mni4 *mni, void *data);
  * @param       data            pointer to data
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetUserData2(Mni4 *mni, void *data);
+MNI_API MniError MniSetUserData2(Mni5 *mni, void *data);
 
 /**
  * @brief       Get first user data.
@@ -670,7 +670,7 @@ MNI_API MniError MniSetUserData2(Mni4 *mni, void *data);
  * @param[out]  data            pointer to receive user data
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetUserData1(Mni4 *mni, void **data);
+MNI_API MniError MniGetUserData1(Mni5 *mni, void **data);
 
 /**
  * @brief       Get first user data.
@@ -678,7 +678,7 @@ MNI_API MniError MniGetUserData1(Mni4 *mni, void **data);
  * @param[out]  data            pointer to receive user data
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetUserData2(Mni4 *mni, void **data);
+MNI_API MniError MniGetUserData2(Mni5 *mni, void **data);
 
 /**
  * @brief       Send balloon notification.
@@ -691,7 +691,7 @@ MNI_API MniError MniGetUserData2(Mni4 *mni, void **data);
  * @return      status code, see #MniError
  */
 MNI_API MniError MniSendBalloonNotification(
-    Mni4                    *mni,
+    Mni5                    *mni,
     const wchar_t           *title,
     const wchar_t           *text,
     MniBalloonIconType      icon_type,
@@ -704,7 +704,7 @@ MNI_API MniError MniSendBalloonNotification(
  * @param       mni             pointer to Mni4 struct
  * @return      status code, see #MniError
  */
-MNI_API MniError MniRemoveBalloonNotification(Mni4 *mni);
+MNI_API MniError MniRemoveBalloonNotification(Mni5 *mni);
 
 /**
  * @brief       Start timer.
@@ -713,7 +713,7 @@ MNI_API MniError MniRemoveBalloonNotification(Mni4 *mni);
  * @param       interval        timer timeout interval
  * @return      status code, see #MniError
  */
-MNI_API MniError MniStartTimer(Mni4 *mni, unsigned int timer_id, unsigned int interval);
+MNI_API MniError MniStartTimer(Mni5 *mni, unsigned int timer_id, unsigned int interval);
 
 /**
  * @brief       Stop timer.
@@ -721,7 +721,7 @@ MNI_API MniError MniStartTimer(Mni4 *mni, unsigned int timer_id, unsigned int in
  * @param       timer_id        timer id
  * @return      status code, see #MniError
  */
-MNI_API MniError MniStopTimer(Mni4 *mni, unsigned int timer_id);
+MNI_API MniError MniStopTimer(Mni5 *mni, unsigned int timer_id);
 
 /**
  * @brief       Send custom massage to queue.
@@ -733,7 +733,7 @@ MNI_API MniError MniStopTimer(Mni4 *mni, unsigned int timer_id);
  * @param       lParam          message specific information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSendCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
+MNI_API MniError MniSendCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
 
 /**
  * @brief       Post custom massage to queue and return immediately.
@@ -743,7 +743,7 @@ MNI_API MniError MniSendCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM
  * @param       lParam          message specific information
  * @return      status code, see #MniError
  */
-MNI_API MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
+MNI_API MniError MniPostCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
 
 /**
  * @brief       Gets the screen coordinates of the bounding rectangle of a notification icon.
@@ -751,7 +751,7 @@ MNI_API MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM
  * @param       pRect           pointer that receive icon coordinates
  * @return      status code, see #MniError
  */
-MNI_API MniError MniGetIconRect(Mni4 *mni, RECT *pRect);
+MNI_API MniError MniGetIconRect(Mni5 *mni, RECT *pRect);
 
 /**
  * @brief       Convert error code to string.
@@ -777,7 +777,7 @@ MNI_API void MniQuit(void);
  * @param       tip             tip text
  * @return      status code, see #MniError
  */
-MNI_API MniError MniSetTipUTF8(Mni4 *mni, const char *tip);
+MNI_API MniError MniSetTipUTF8(Mni5 *mni, const char *tip);
 
 /**
  * @brief           Get current tip in UTF-8 string.
@@ -789,7 +789,7 @@ MNI_API MniError MniSetTipUTF8(Mni4 *mni, const char *tip);
  * @param[in, out]  len         pointer to int, see remarks
  * @return          status code, see #MniError
  */
-MNI_API MniError MniGetTipUTF8(Mni4 *mni, char *buffer, int *len);
+MNI_API MniError MniGetTipUTF8(Mni5 *mni, char *buffer, int *len);
 
 /**
  * @brief       Send balloon notification using UTF-8 string.
@@ -802,7 +802,7 @@ MNI_API MniError MniGetTipUTF8(Mni4 *mni, char *buffer, int *len);
  * @return      status code, see #MniError
  */
 MNI_API MniError MniSendBalloonNotificationUTF8(
-    Mni4                    *mni,
+    Mni5                    *mni,
     const char              *title,
     const char              *text,
     MniBalloonIconType      icon_type,
@@ -1294,7 +1294,7 @@ static _PtrToWideStringResult _PtrToWideString(void *ptr, MniBool upper) {
 
 #pragma region Window Messages
 
-static MniBool _MniWmWindowCreate(Mni4 *mni) {
+static MniBool _MniWmWindowCreate(Mni5 *mni) {
     MNI_TRACE(L"_MniWmWindowCreate()");
 
     if (mni->on_window_create) {
@@ -1306,7 +1306,7 @@ static MniBool _MniWmWindowCreate(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmWindowDestroy(Mni4 *mni) {
+static MniBool _MniWmWindowDestroy(Mni5 *mni) {
     MNI_TRACE(L"_MniWmWindowDestroy()");
 
     if (mni->on_window_destroy) {
@@ -1318,7 +1318,7 @@ static MniBool _MniWmWindowDestroy(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmInit(Mni4 *mni) {
+static MniBool _MniWmInit(Mni5 *mni) {
     MNI_TRACE(L"_MniWmInit()");
 
     if (mni->on_init) {
@@ -1330,7 +1330,7 @@ static MniBool _MniWmInit(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmRelease(Mni4 *mni) {
+static MniBool _MniWmRelease(Mni5 *mni) {
     MNI_TRACE(L"_MniWmRelease()");
 
     if (mni->on_release) {
@@ -1342,7 +1342,7 @@ static MniBool _MniWmRelease(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmIconShow(Mni4 *mni) {
+static MniBool _MniWmIconShow(Mni5 *mni) {
     MNI_TRACE(L"_MniWmIconShow()");
 
     if (mni->on_show) {
@@ -1354,7 +1354,7 @@ static MniBool _MniWmIconShow(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmIconHide(Mni4 *mni) {
+static MniBool _MniWmIconHide(Mni5 *mni) {
     MNI_TRACE(L"_MniWmIconHide()");
 
     if (mni->on_hide) {
@@ -1366,7 +1366,7 @@ static MniBool _MniWmIconHide(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmIconChange(Mni4 *mni, HICON icon) {
+static MniBool _MniWmIconChange(Mni5 *mni, HICON icon) {
     MNI_TRACE(L"_MniWmIconChange()");
 
     if (mni->on_icon_change) {
@@ -1378,7 +1378,7 @@ static MniBool _MniWmIconChange(Mni4 *mni, HICON icon) {
 
 // ========================================================================== //
 
-static MniBool _MniWmMenuChange(Mni4 *mni, HMENU menu) {
+static MniBool _MniWmMenuChange(Mni5 *mni, HMENU menu) {
     MNI_TRACE(L"_MniWmMenuChange()");
 
     if (mni->on_menu_change) {
@@ -1390,7 +1390,7 @@ static MniBool _MniWmMenuChange(Mni4 *mni, HMENU menu) {
 
 // ========================================================================== //
 
-static MniBool _MniWmTipChange(Mni4 *mni, const wchar_t *tip) {
+static MniBool _MniWmTipChange(Mni5 *mni, const wchar_t *tip) {
     MNI_TRACE(L"_MniWmTipChange()");
 
     if (mni->on_tip_change) {
@@ -1402,7 +1402,7 @@ static MniBool _MniWmTipChange(Mni4 *mni, const wchar_t *tip) {
 
 // ========================================================================== //
 
-static MniBool _MniWmTipTypeChange(Mni4 *mni, MniTipType mtt) {
+static MniBool _MniWmTipTypeChange(Mni5 *mni, MniTipType mtt) {
     MNI_TRACE(L"_MniWmTipTypeChange()");
 
     if (mni->on_tip_type_change) {
@@ -1414,7 +1414,7 @@ static MniBool _MniWmTipTypeChange(Mni4 *mni, MniTipType mtt) {
 
 // ========================================================================== //
 
-static MniBool _MniWmKeySelect(Mni4 *mni, int x, int y) {
+static MniBool _MniWmKeySelect(Mni5 *mni, int x, int y) {
     MNI_TRACE(
         L"_MniWmKeySelect(x=%d, y=%d), prevent_double_key_select=%d",
         x,
@@ -1442,7 +1442,7 @@ static MniBool _MniWmKeySelect(Mni4 *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmLmbClick(Mni4 *mni, int x, int y) {
+static MniBool _MniWmLmbClick(Mni5 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmLmbClick(x=%d, y=%d)", x, y);
 
     if (mni->on_lmb_click) {
@@ -1454,7 +1454,7 @@ static MniBool _MniWmLmbClick(Mni4 *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmLmbDoubleClick(Mni4 *mni, int x, int y) {
+static MniBool _MniWmLmbDoubleClick(Mni5 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmLmbDoubleClick(x=%d, y=%d)", x, y);
 
     if (mni->on_lmb_double_click) {
@@ -1466,7 +1466,7 @@ static MniBool _MniWmLmbDoubleClick(Mni4 *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmMmbClick(Mni4 *mni, int x, int y) {
+static MniBool _MniWmMmbClick(Mni5 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmMmbClick(x=%d, y=%d)", x, y);
 
     if (mni->on_mmb_click) {
@@ -1478,7 +1478,7 @@ static MniBool _MniWmMmbClick(Mni4 *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmContextMenu(Mni4 *mni, int x, int y) {
+static MniBool _MniWmContextMenu(Mni5 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmContextMenu(x=%d, y=%d)", x, y);
     if (mni->on_context_menu_open) {
         mni->on_context_menu_open(mni);
@@ -1553,7 +1553,7 @@ static MniBool _MniWmContextMenu(Mni4 *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonShow(Mni4 *mni) {
+static MniBool _MniWmBalloonShow(Mni5 *mni) {
     MNI_TRACE(L"_MniWmBalloonShow()");
 
     if (mni->on_balloon_show) {
@@ -1565,7 +1565,7 @@ static MniBool _MniWmBalloonShow(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonHide(Mni4 *mni) {
+static MniBool _MniWmBalloonHide(Mni5 *mni) {
     MNI_TRACE(L"_MniWmBalloonHide()");
 
     if (mni->on_balloon_hide) {
@@ -1577,7 +1577,7 @@ static MniBool _MniWmBalloonHide(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonTimeout(Mni4 *mni) {
+static MniBool _MniWmBalloonTimeout(Mni5 *mni) {
     MNI_TRACE(L"_MniWmBalloonTimeout()");
 
     if (mni->on_balloon_timeout) {
@@ -1589,7 +1589,7 @@ static MniBool _MniWmBalloonTimeout(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmBalloonUserClick(Mni4 *mni) {
+static MniBool _MniWmBalloonUserClick(Mni5 *mni) {
     MNI_TRACE(L"_MniWmBalloonUserClick()");
 
     if (mni->on_balloon_click) {
@@ -1601,7 +1601,7 @@ static MniBool _MniWmBalloonUserClick(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmRichPopupOpen(Mni4 *mni, int x, int y) {
+static MniBool _MniWmRichPopupOpen(Mni5 *mni, int x, int y) {
     MNI_TRACE(L"_MniWmRichPopupOpen(x=%d, y=%d)", x, y);
 
     if (mni->on_rich_popup_open) {
@@ -1613,7 +1613,7 @@ static MniBool _MniWmRichPopupOpen(Mni4 *mni, int x, int y) {
 
 // ========================================================================== //
 
-static MniBool _MniWmRichPopupClose(Mni4 *mni) {
+static MniBool _MniWmRichPopupClose(Mni5 *mni) {
     MNI_TRACE(L"_MniWmRichPopupClose()");
 
     if (mni->on_rich_popup_close) {
@@ -1625,7 +1625,7 @@ static MniBool _MniWmRichPopupClose(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmDpiChange(Mni4 *mni, int dpi) {
+static MniBool _MniWmDpiChange(Mni5 *mni, int dpi) {
     MNI_TRACE(L"_MniWmDpiChange(dpi=%d)", dpi);
 
     if (mni->dpi != dpi) {
@@ -1641,7 +1641,7 @@ static MniBool _MniWmDpiChange(Mni4 *mni, int dpi) {
 
 // ========================================================================== //
 
-static MniBool _MniWmThemeChange(Mni4 *mni, MniBool is_hc) {
+static MniBool _MniWmThemeChange(Mni5 *mni, MniBool is_hc) {
     MNI_TRACE(L"_MniWmThemeChange()");
 
     // When theme change this is invoked multiple times, using is_hc is unstable.
@@ -1694,7 +1694,7 @@ static MniBool _MniWmThemeChange(Mni4 *mni, MniBool is_hc) {
 
 // ========================================================================== //
 
-static MniBool _MniWmTaskbarCreated(Mni4 *mni) {
+static MniBool _MniWmTaskbarCreated(Mni5 *mni) {
     MNI_TRACE(
         L"_MniWmTaskbarCreated(), is_dpi_event=%d, primary_monitor=%p",
         mni->is_dpi_event,
@@ -1728,7 +1728,7 @@ static MniBool _MniWmTaskbarCreated(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniBool _MniWmUserTimerTimeout(Mni4 *mni, UINT_PTR id) {
+static MniBool _MniWmUserTimerTimeout(Mni5 *mni, UINT_PTR id) {
     MNI_TRACE(L"_MniWmUserTimerTimeout(id=%d)", id);
 
     if (id < MNI_INTERNAL_TIMER_START_ID) {
@@ -1742,7 +1742,7 @@ static MniBool _MniWmUserTimerTimeout(Mni4 *mni, UINT_PTR id) {
 
 // ========================================================================== //
 
-static MniBool _MniWmInternalTimerTimeout(Mni4 *mni, UINT_PTR id) {
+static MniBool _MniWmInternalTimerTimeout(Mni5 *mni, UINT_PTR id) {
     MNI_TRACE(L"_MniWmInternalTimerTimeout(id=%d)", id);
 
     if (id < MNI_INTERNAL_TIMER_START_ID) {
@@ -1759,7 +1759,7 @@ static MniBool _MniWmInternalTimerTimeout(Mni4 *mni, UINT_PTR id) {
 
 // ========================================================================== //
 
-static MniBool _MniWmCustomMessage(Mni4 *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static MniBool _MniWmCustomMessage(Mni5 *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE(L"_MniWmCustomMessage(uMsg=%d, wParam=%lld, lParam=%lld)", uMsg, wParam, lParam);
 
     if (mni->on_custom_message) {
@@ -1771,7 +1771,7 @@ static MniBool _MniWmCustomMessage(Mni4 *mni, UINT uMsg, WPARAM wParam, LPARAM l
 
 // ========================================================================== //
 
-static MniBool _MniWmSystemMessage(Mni4 *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static MniBool _MniWmSystemMessage(Mni5 *mni, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (mni->on_system_message) {
         return mni->on_system_message(mni, uMsg, wParam, lParam);
     }
@@ -1785,7 +1785,7 @@ static MniBool _MniWmSystemMessage(Mni4 *mni, UINT uMsg, WPARAM wParam, LPARAM l
 
 #pragma region Window Procedure
 
-static LRESULT _MniDispatch(Mni4 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE2(L"_MniDispatch(uMsg=0x%04x, wParam=%lld, lParam=%lld)", uMsg, wParam, lParam);
 
     // Register message when taskbar is created to get notified when explorer.exe gets restarted.
@@ -2023,17 +2023,17 @@ static LRESULT _MniDispatch(Mni4 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 // ========================================================================== //
 
 static LRESULT CALLBACK _MniWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    Mni4 *mni = NULL;
+    Mni5 *mni = NULL;
 
     if (uMsg == WM_NCCREATE) {
         LPCREATESTRUCT lpCreateStruct = (LPCREATESTRUCT)lParam;
 
-        mni = (Mni4 *)lpCreateStruct->lpCreateParams;
+        mni = (Mni5 *)lpCreateStruct->lpCreateParams;
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)mni);
 
         mni->window_handle = hWnd;
     } else {
-        mni = (Mni4 *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        mni = (Mni5 *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
     }
 
     if (mni) {
@@ -2049,7 +2049,7 @@ static LRESULT CALLBACK _MniWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 #pragma region Internal Methods
 
-static MniError _MniUpdateIcon(Mni4 *mni, HICON icon) {
+static MniError _MniUpdateIcon(Mni5 *mni, HICON icon) {
     MNI_TRACE(L"_MniUpdateIcon(icon=%p), icon_created=%d", icon, mni->icon_created);
 
     if (mni->icon_created) {
@@ -2080,7 +2080,7 @@ static MniError _MniUpdateIcon(Mni4 *mni, HICON icon) {
 
 // ========================================================================== //
 
-static MniError _MniUpdateMenu(Mni4 *mni, HMENU menu) {
+static MniError _MniUpdateMenu(Mni5 *mni, HMENU menu) {
     MNI_TRACE(L"_MniUpdateMenu(menu=%p)", menu);
 
     UNREFERENCED_PARAMETER(menu);
@@ -2091,7 +2091,7 @@ static MniError _MniUpdateMenu(Mni4 *mni, HMENU menu) {
 
 // ========================================================================== //
 
-static MniError _MniUpdateTip(Mni4 *mni, const wchar_t *tip) {
+static MniError _MniUpdateTip(Mni5 *mni, const wchar_t *tip) {
     MNI_TRACE(L"_MniUpdateTip(tip=%p)", &tip);
 
     if (mni->icon_created) {
@@ -2122,7 +2122,7 @@ static MniError _MniUpdateTip(Mni4 *mni, const wchar_t *tip) {
 
 // ========================================================================== //
 
-static MniError _MniInternalCreateWindow(Mni4 *mni, MniInfo info) {
+static MniError _MniInternalCreateWindow(Mni5 *mni, MniInfo info) {
     MNI_TRACE(L"_MniInternalCreateWindow()");
 
     if (mni->window_handle != NULL) {
@@ -2212,7 +2212,7 @@ static MniError _MniInternalCreateWindow(Mni4 *mni, MniInfo info) {
 
 // ========================================================================== //
 
-static MniError _MniInternalDestroyWindow(Mni4 *mni) {
+static MniError _MniInternalDestroyWindow(Mni5 *mni) {
     MNI_TRACE(L"_MniInternalDestroyWindow()");
 
     if (mni->window_handle == NULL) {
@@ -2229,7 +2229,7 @@ static MniError _MniInternalDestroyWindow(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniError _MniInternalCreateNotifyIcon(Mni4 *mni) {
+static MniError _MniInternalCreateNotifyIcon(Mni5 *mni) {
     MNI_TRACE(
         L"_MniInternalCreateNotifyIcon(), icon_created=%d, window_handle=%p",
         mni->icon_created,
@@ -2293,7 +2293,7 @@ static MniError _MniInternalCreateNotifyIcon(Mni4 *mni) {
 
 // ========================================================================== //
 
-static MniError _MniInternalDestroyNotifyIcon(Mni4 *mni) {
+static MniError _MniInternalDestroyNotifyIcon(Mni5 *mni) {
     MNI_TRACE(
         L"_MniInternalDestroyNotifyIcon(), icon_created=%d, window_handle=%p",
         mni->icon_created,
@@ -2331,7 +2331,7 @@ static MniError _MniInternalDestroyNotifyIcon(Mni4 *mni) {
 
 #pragma region Public API
 
-MniError MniInit(Mni4 *mni, MniInfo info) {
+MniError MniInit(Mni5 *mni, MniInfo info) {
     MNI_TRACE(L"MniInit(mni=%p) info={", mni);
     MNI_TRACE(L"\t.instance_handle=%p", info.instance_handle);
     MNI_TRACE(L"\t.class_name=%p", info.class_name);
@@ -2462,7 +2462,7 @@ MniError MniInit(Mni4 *mni, MniInfo info) {
 
 // ========================================================================== //
 
-MniError MniRelease(Mni4 *mni) {
+MniError MniRelease(Mni5 *mni) {
     MNI_TRACE(L"MniRelease(mni=%p)", mni);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2492,7 +2492,7 @@ MniError MniRelease(Mni4 *mni) {
 
 // ========================================================================== //
 
-MniError MniShow(Mni4 *mni, MniBool recreate) {
+MniError MniShow(Mni5 *mni, MniBool recreate) {
     MNI_TRACE(L"MniShow(mni=%p, recreate=%d)", mni, recreate);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2567,7 +2567,7 @@ MniError MniShow(Mni4 *mni, MniBool recreate) {
 
 // ========================================================================== //
 
-MniError MniHide(Mni4 *mni) {
+MniError MniHide(Mni5 *mni) {
     MNI_TRACE(L"MniHide(mni=%p)", mni);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2621,7 +2621,7 @@ MniError MniHide(Mni4 *mni) {
 
 // ========================================================================== //
 
-MniError MniSetIcon(Mni4 *mni, HICON icon, MniRdp rdp) {
+MniError MniSetIcon(Mni5 *mni, HICON icon, MniRdp rdp) {
     MNI_TRACE(L"MniSetIcon(mni=%p, icon=%p, rdp=%d)", mni, icon, rdp);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2651,7 +2651,7 @@ MniError MniSetIcon(Mni4 *mni, HICON icon, MniRdp rdp) {
 
 // ========================================================================== //
 
-MniError MniSetMenu(Mni4 *mni, HMENU menu, MniRdp rdp) {
+MniError MniSetMenu(Mni5 *mni, HMENU menu, MniRdp rdp) {
     MNI_TRACE(L"MniSetMenu(mni=%p, menu=%p, rdp=%d)", mni, menu, rdp);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2681,7 +2681,7 @@ MniError MniSetMenu(Mni4 *mni, HMENU menu, MniRdp rdp) {
 
 // ========================================================================== //
 
-MniError MniSetTip(Mni4 *mni, const wchar_t *tip) {
+MniError MniSetTip(Mni5 *mni, const wchar_t *tip) {
     MNI_TRACE(L"MniSetTip(mni=%p, tip=%p)", mni, tip);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2706,7 +2706,7 @@ MniError MniSetTip(Mni4 *mni, const wchar_t *tip) {
 
 // ========================================================================== //
 
-MniError MniSetTipType(Mni4 *mni, MniTipType mtt) {
+MniError MniSetTipType(Mni5 *mni, MniTipType mtt) {
     MNI_TRACE(L"MniSetTipType(mni=%p, mtt=%p)", mni, &mtt);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2737,7 +2737,7 @@ MniError MniSetTipType(Mni4 *mni, MniTipType mtt) {
 
 // ========================================================================== //
 
-MniError MniGetIcon(Mni4 *mni, HICON *icon) {
+MniError MniGetIcon(Mni5 *mni, HICON *icon) {
     MNI_TRACE(L"MniGetIcon(mni=%p, icon=%p)", mni, icon);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2756,7 +2756,7 @@ MniError MniGetIcon(Mni4 *mni, HICON *icon) {
 
 // ========================================================================== //
 
-MniError MniGetMenu(Mni4 *mni, HMENU *menu) {
+MniError MniGetMenu(Mni5 *mni, HMENU *menu) {
     MNI_TRACE(L"MniGetMenu(mni=%p, menu=%p)", mni, menu);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2775,7 +2775,7 @@ MniError MniGetMenu(Mni4 *mni, HMENU *menu) {
 
 // ========================================================================== //
 
-MniError MniGetTip(Mni4 *mni, wchar_t *buffer, int *len) {
+MniError MniGetTip(Mni5 *mni, wchar_t *buffer, int *len) {
     MNI_TRACE(L"MniGetTip(mni=%p, buffer=%p, len=%p)", mni, buffer, len);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2815,7 +2815,7 @@ MniError MniGetTip(Mni4 *mni, wchar_t *buffer, int *len) {
 
 // ========================================================================== //
 
-MniError MniGetTipType(Mni4 *mni, MniTipType *mtt) {
+MniError MniGetTipType(Mni5 *mni, MniTipType *mtt) {
     MNI_TRACE(L"MniGetTip(mni=%p, mtt=%p)", mni, mtt);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2834,7 +2834,7 @@ MniError MniGetTipType(Mni4 *mni, MniTipType *mtt) {
 
 // ========================================================================== //
 
-MniError MniIsNotifyIconCreated(Mni4 *mni, MniBool *is_created) {
+MniError MniIsNotifyIconCreated(Mni5 *mni, MniBool *is_created) {
     MNI_TRACE(L"MniIsNotifyIconCreated(mni=%p, is_create=%p)", mni, is_created);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2853,7 +2853,7 @@ MniError MniIsNotifyIconCreated(Mni4 *mni, MniBool *is_created) {
 
 // ========================================================================== //
 
-MniError MniIsNotifyIconVisible(Mni4 *mni, MniBool *is_visible) {
+MniError MniIsNotifyIconVisible(Mni5 *mni, MniBool *is_visible) {
     MNI_TRACE(L"MniIsNotifyIconVisible(mni=%p, is_visible=%p)", mni, is_visible);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2872,7 +2872,7 @@ MniError MniIsNotifyIconVisible(Mni4 *mni, MniBool *is_visible) {
 
 // ========================================================================== //
 
-MniError MniGetWindowHandle(Mni4 *mni, HWND *window_handle) {
+MniError MniGetWindowHandle(Mni5 *mni, HWND *window_handle) {
     MNI_TRACE(L"MniGetWindowHandle(mni=%p, window_handle=%p)", mni, window_handle);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2891,7 +2891,7 @@ MniError MniGetWindowHandle(Mni4 *mni, HWND *window_handle) {
 
 // ========================================================================== //
 
-MniError MniGetInstanceHandle(Mni4 *mni, HINSTANCE *instance_handle) {
+MniError MniGetInstanceHandle(Mni5 *mni, HINSTANCE *instance_handle) {
     MNI_TRACE(L"MniGetInstanceHandle(mni=%p, instance_handle=%p)", mni, instance_handle);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2910,7 +2910,7 @@ MniError MniGetInstanceHandle(Mni4 *mni, HINSTANCE *instance_handle) {
 
 // ========================================================================== //
 
-MniError MniGetDpi(Mni4 *mni, int *dpi) {
+MniError MniGetDpi(Mni5 *mni, int *dpi) {
     MNI_TRACE(L"MniGetDpi(mni=%p, dpi=%p)", mni, dpi);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2929,7 +2929,7 @@ MniError MniGetDpi(Mni4 *mni, int *dpi) {
 
 // ========================================================================== //
 
-MniError MniGetSystemThemeInfo(Mni4 *mni, MniThemeInfo *system_theme) {
+MniError MniGetSystemThemeInfo(Mni5 *mni, MniThemeInfo *system_theme) {
     MNI_TRACE(L"MniGetSystemThemeInfo(mni=%p, system_theme=%p)", mni, system_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2948,7 +2948,7 @@ MniError MniGetSystemThemeInfo(Mni4 *mni, MniThemeInfo *system_theme) {
 
 // ========================================================================== //
 
-MniError MniGetAppsThemeInfo(Mni4 *mni, MniThemeInfo *apps_theme) {
+MniError MniGetAppsThemeInfo(Mni5 *mni, MniThemeInfo *apps_theme) {
     MNI_TRACE(L"MniGetAppsThemeInfo(mni=%p, apps_theme=%p)", mni, apps_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2967,7 +2967,7 @@ MniError MniGetAppsThemeInfo(Mni4 *mni, MniThemeInfo *apps_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmStyle(Mni4 *mni, MniIcmStyle icm_style) {
+MNI_API MniError MniSetIcmStyle(Mni5 *mni, MniIcmStyle icm_style) {
     MNI_TRACE(L"MniSetIcmTheme(mni=%p, icm_style=%d)", mni, icm_style);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2982,7 +2982,7 @@ MNI_API MniError MniSetIcmStyle(Mni4 *mni, MniIcmStyle icm_style) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmTheme(Mni4 *mni, MniIcmTheme icm_theme) {
+MNI_API MniError MniSetIcmTheme(Mni5 *mni, MniIcmTheme icm_theme) {
     MNI_TRACE(L"MniSetIcmTheme(mni=%p, icm_theme=%d)", mni, icm_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -2997,7 +2997,7 @@ MNI_API MniError MniSetIcmTheme(Mni4 *mni, MniIcmTheme icm_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmPosition(Mni4 *mni, MniIcmPosition icm_pos) {
+MNI_API MniError MniSetIcmPosition(Mni5 *mni, MniIcmPosition icm_pos) {
     MNI_TRACE(L"MniSetIcmPosition(mni=%p, icm_pos=%d)", mni, icm_pos);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3012,7 +3012,7 @@ MNI_API MniError MniSetIcmPosition(Mni4 *mni, MniIcmPosition icm_pos) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmAnimation(Mni4 *mni, MniIcmAnimation icm_anim) {
+MNI_API MniError MniSetIcmAnimation(Mni5 *mni, MniIcmAnimation icm_anim) {
     MNI_TRACE(L"MniSetIcmAnimation(mni=%p, icm_anim=%d)", mni, icm_anim);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3027,7 +3027,7 @@ MNI_API MniError MniSetIcmAnimation(Mni4 *mni, MniIcmAnimation icm_anim) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmStyle(Mni4 *mni, MniIcmStyle *icm_style) {
+MNI_API MniError MniGetIcmStyle(Mni5 *mni, MniIcmStyle *icm_style) {
     MNI_TRACE(L"MniGetIcmStyle(mni=%p, icm_style=%p)", mni, icm_style);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3046,7 +3046,7 @@ MNI_API MniError MniGetIcmStyle(Mni4 *mni, MniIcmStyle *icm_style) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmTheme(Mni4 *mni, MniIcmTheme *icm_theme) {
+MNI_API MniError MniGetIcmTheme(Mni5 *mni, MniIcmTheme *icm_theme) {
     MNI_TRACE(L"MniGetIcmTheme(mni=%p, icm_theme=%p)", mni, icm_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3065,7 +3065,7 @@ MNI_API MniError MniGetIcmTheme(Mni4 *mni, MniIcmTheme *icm_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmPosition(Mni4 *mni, MniIcmPosition *icm_pos) {
+MNI_API MniError MniGetIcmPosition(Mni5 *mni, MniIcmPosition *icm_pos) {
     MNI_TRACE(L"MniGetIcmPosition(mni=%p, icm_pos=%p)", mni, icm_pos);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3084,7 +3084,7 @@ MNI_API MniError MniGetIcmPosition(Mni4 *mni, MniIcmPosition *icm_pos) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmAnimation(Mni4 *mni, MniIcmAnimation *icm_anim) {
+MNI_API MniError MniGetIcmAnimation(Mni5 *mni, MniIcmAnimation *icm_anim) {
     MNI_TRACE(L"MniGetIcmAnimation(mni=%p, icm_anim=%p)", mni, icm_anim);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3103,7 +3103,7 @@ MNI_API MniError MniGetIcmAnimation(Mni4 *mni, MniIcmAnimation *icm_anim) {
 
 // ========================================================================== //
 
-MniError MniSetUserData1(Mni4 *mni, void *data) {
+MniError MniSetUserData1(Mni5 *mni, void *data) {
     MNI_TRACE(L"MniSetUserData1(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3118,7 +3118,7 @@ MniError MniSetUserData1(Mni4 *mni, void *data) {
 
 // ========================================================================== //
 
-MniError MniSetUserData2(Mni4 *mni, void *data) {
+MniError MniSetUserData2(Mni5 *mni, void *data) {
     MNI_TRACE(L"MniSetUserData2(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3133,7 +3133,7 @@ MniError MniSetUserData2(Mni4 *mni, void *data) {
 
 // ========================================================================== //
 
-MniError MniGetUserData1(Mni4 *mni, void **data) {
+MniError MniGetUserData1(Mni5 *mni, void **data) {
     MNI_TRACE(L"MniGetUserData1(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3152,7 +3152,7 @@ MniError MniGetUserData1(Mni4 *mni, void **data) {
 
 // ========================================================================== //
 
-MniError MniGetUserData2(Mni4 *mni, void **data) {
+MniError MniGetUserData2(Mni5 *mni, void **data) {
     MNI_TRACE(L"MniGetUserData2(mni=%p, data=%p)", mni, data);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3172,7 +3172,7 @@ MniError MniGetUserData2(Mni4 *mni, void **data) {
 // ========================================================================== //
 
 MniError MniSendBalloonNotification(
-    Mni4                    *mni,
+    Mni5                    *mni,
     const wchar_t           *title,
     const wchar_t           *text,
     MniBalloonIconType      icon_type,
@@ -3266,7 +3266,7 @@ MniError MniSendBalloonNotification(
 
 // ========================================================================== //
 
-MniError MniRemoveBalloonNotification(Mni4 *mni) {
+MniError MniRemoveBalloonNotification(Mni5 *mni) {
     MNI_TRACE(L"MniRemoveBalloonNotification(mni=%p)", mni);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3300,7 +3300,7 @@ MniError MniRemoveBalloonNotification(Mni4 *mni) {
 
 // ========================================================================== //
 
-MniError MniStartTimer(Mni4 *mni, unsigned int timer_id, unsigned int interval) {
+MniError MniStartTimer(Mni5 *mni, unsigned int timer_id, unsigned int interval) {
     MNI_TRACE(L"MniStartTimer(mni=%p, timer_id=%d, interval=%d)", mni, timer_id, interval);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3326,7 +3326,7 @@ MniError MniStartTimer(Mni4 *mni, unsigned int timer_id, unsigned int interval) 
 
 // ========================================================================== //
 
-MniError MniStopTimer(Mni4 *mni, unsigned int timer_id) {
+MniError MniStopTimer(Mni5 *mni, unsigned int timer_id) {
     MNI_TRACE(L"MniStopTimer(mni=%p, timer_id=%d)", mni, timer_id);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3352,7 +3352,7 @@ MniError MniStopTimer(Mni4 *mni, unsigned int timer_id) {
 
 // ========================================================================== //
 
-MniError MniSendCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
+MniError MniSendCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE(L"MniSendCustomMessage(mni=%p, msg=%d, wParam=%p, lParam=%p)", mni, msg, wParam, lParam);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3378,7 +3378,7 @@ MniError MniSendCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam)
 
 // ========================================================================== //
 
-MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
+MniError MniPostCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam) {
     MNI_TRACE(L"MniPostCustomMessage(mni=%p, msg=%d, wParam=%p, lParam=%p)", mni, msg, wParam, lParam);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3403,7 +3403,7 @@ MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam)
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIconRect(Mni4 *mni, RECT *pRect) {
+MNI_API MniError MniGetIconRect(Mni5 *mni, RECT *pRect) {
     if (!mni) {
         return MNI_ERROR_MNI_PTR_IS_NULL;
     }
@@ -3512,7 +3512,7 @@ void MniQuit(void) {
 
 // ========================================================================== //
 
-MniError MniSetTipUTF8(Mni4 *mni, const char *tip) {
+MniError MniSetTipUTF8(Mni5 *mni, const char *tip) {
     MNI_TRACE(L"MniSetTipUTF8(mni=%p, tip=%p)", mni, tip);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3536,7 +3536,7 @@ MniError MniSetTipUTF8(Mni4 *mni, const char *tip) {
 
 // ========================================================================== //
 
-MniError MniGetTipUTF8(Mni4 *mni, char *buffer, int *len) {
+MniError MniGetTipUTF8(Mni5 *mni, char *buffer, int *len) {
     MNI_TRACE(L"MniGetTipUTF8(mni=%p, buffer=%p, len=%p)", mni, buffer, len);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3590,7 +3590,7 @@ MniError MniGetTipUTF8(Mni4 *mni, char *buffer, int *len) {
 // ========================================================================== //
 
 MniError MniSendBalloonNotificationUTF8(
-    Mni4                    *mni,
+    Mni5                    *mni,
     const char              *title,
     const char              *text,
     MniBalloonIconType      icon_type,

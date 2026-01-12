@@ -214,9 +214,9 @@ static HICON _LoadIcon(MniThemeInfo mti, int dpi) {
 
 #pragma region "Event Handlers"
 
-void OnInit(Mni4 *MNI) {
+void OnInit(Mni5 *mni) {
     Demo *demo = NULL;
-    if (MNI_FAILED(MniGetUserData1(MNI, &demo))) {
+    if (MNI_FAILED(MniGetUserData1(mni, &demo))) {
         return;
     }
 
@@ -281,16 +281,16 @@ void OnInit(Mni4 *MNI) {
     SetItemBitmap(demo->menu_main, MENU_IMG_ITEM, demo->bmp_custom);
     SetItemBitmap(demo->menu_main, MENU_IMG_CHECK, demo->bmp_custom);
 
-    HICON ico = _LoadIcon(MNI->system_theme, MNI->dpi);
+    HICON ico = _LoadIcon(mni->system_theme, mni->dpi);
 
-    MniSetIcon(MNI, ico, MNI_RDP_AUTO);
-    MniSetMenu(MNI, demo->menu_popup, MNI_RDP_AUTO);
-    MniSetTip(MNI, L"Demo Tip");
+    MniSetIcon(mni, ico, MNI_RDP_AUTO);
+    MniSetMenu(mni, demo->menu_popup, MNI_RDP_AUTO);
+    MniSetTip(mni, L"Demo Tip");
 }
 
-void OnRelease(Mni4 *MNI) {
+void OnRelease(Mni5 *mni) {
     Demo *demo = NULL;
-    if (MNI_FAILED(MniGetUserData1(MNI, &demo))) {
+    if (MNI_FAILED(MniGetUserData1(mni, &demo))) {
         return;
     }
 
@@ -299,9 +299,9 @@ void OnRelease(Mni4 *MNI) {
     DeleteObject(demo->bmp_custom);
 }
 
-void OnLmbClick(Mni4 *MNI, int x, int y) {
+void OnLmbClick(Mni5 *mni, int x, int y) {
     Demo *demo = NULL;
-    if (MNI_FAILED(MniGetUserData1(MNI, &demo))) {
+    if (MNI_FAILED(MniGetUserData1(mni, &demo))) {
         return;
     }
 
@@ -317,41 +317,41 @@ void OnLmbClick(Mni4 *MNI, int x, int y) {
     }
 }
 
-void OnLmbDoubleClick(Mni4 *MNI, int x, int y) {
+void OnLmbDoubleClick(Mni5 *mni, int x, int y) {
     MessageBoxW(0, L"Double clicked on icon", L"Event", MB_OK);
 }
 
-void OnTaskbarCreated(Mni4 *MNI) {
+void OnTaskbarCreated(Mni5 *mni) {
     // Set 'recreate' paramater to MNI_TRUE, so icon get recreated.
-    MniShow(MNI, MNI_TRUE);
+    MniShow(mni, MNI_TRUE);
 }
 
-void OnDpiChange(Mni4 *MNI, int dpi) {
+void OnDpiChange(Mni5 *mni, int dpi) {
     // Load icon with updated size.
-    HICON ico = _LoadIcon(MNI->system_theme, dpi);
-    MniSetIcon(MNI, ico, MNI_RDP_AUTO);
+    HICON ico = _LoadIcon(mni->system_theme, dpi);
+    MniSetIcon(mni, ico, MNI_RDP_AUTO);
 }
 
-void OnSystemThemeChange(Mni4 *MNI, MniThemeInfo mti) {
+void OnSystemThemeChange(Mni5 *mni, MniThemeInfo mti) {
     // Load icon depending on theme.
-    HICON ico = _LoadIcon(mti, MNI->dpi);
-    MniSetIcon(MNI, ico, MNI_RDP_AUTO);
+    HICON ico = _LoadIcon(mti, mni->dpi);
+    MniSetIcon(mni, ico, MNI_RDP_AUTO);
 }
 
-void OnTimer(Mni4 *MNI, unsigned int timer_id) {
+void OnTimer(Mni5 *mni, unsigned int timer_id) {
     if (timer_id == TIMER_HIDE_FOR_1_SEC) {
-        MniShow(MNI, MNI_FALSE);
-        MniStopTimer(MNI, TIMER_HIDE_FOR_1_SEC);
+        MniShow(mni, MNI_FALSE);
+        MniStopTimer(mni, TIMER_HIDE_FOR_1_SEC);
     }
 }
 
-void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
+void OnContextMenuClick(Mni5 *mni, int selectedItem) {
     Demo *demo = NULL;
-    if (MNI_FAILED(MniGetUserData1(MNI, &demo))) {
+    if (MNI_FAILED(MniGetUserData1(mni, &demo))) {
         return;
     }
 
-    HMENU menu = MNI->menu;
+    HMENU menu = mni->menu;
 
     switch (selectedItem) {
     case MENU_EMPTY:
@@ -359,8 +359,8 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
         break;
     
     case MENU_HIDE_SHOW:
-        MniHide(MNI);
-        MniStartTimer(MNI, TIMER_HIDE_FOR_1_SEC, 1000);
+        MniHide(mni);
+        MniStartTimer(mni, TIMER_HIDE_FOR_1_SEC, 1000);
         break;
     
     case MENU_CLICKME:
@@ -410,7 +410,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
                 flags |= MNI_BALLOON_FLAGS_RESPECT_QUIET_TIME;
             }
     
-            MniSendBalloonNotification(MNI, L"Title", L"Text", bi, demo->ico_balloon, flags);
+            MniSendBalloonNotification(mni, L"Title", L"Text", bi, demo->ico_balloon, flags);
         }
         break;
     
@@ -419,7 +419,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
             SetItemCheckState(demo->menu_style, MENU_STYLE_AUTO, TRUE);
             SetItemCheckState(demo->menu_style, MENU_STYLE_IMMERSIVE, FALSE);
             SetItemCheckState(demo->menu_style, MENU_STYLE_CLASSIC, FALSE);
-            MniSetIcmStyle(MNI, MNI_ICM_STYLE_AUTO);
+            MniSetIcmStyle(mni, MNI_ICM_STYLE_AUTO);
         }
         break;
     case MENU_STYLE_IMMERSIVE:
@@ -427,7 +427,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
             SetItemCheckState(demo->menu_style, MENU_STYLE_AUTO, FALSE);
             SetItemCheckState(demo->menu_style, MENU_STYLE_IMMERSIVE, TRUE);
             SetItemCheckState(demo->menu_style, MENU_STYLE_CLASSIC, FALSE);
-            MniSetIcmStyle(MNI, MNI_ICM_STYLE_IMMERSIVE);
+            MniSetIcmStyle(mni, MNI_ICM_STYLE_IMMERSIVE);
         }
         break;
     case MENU_STYLE_CLASSIC:
@@ -435,7 +435,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
             SetItemCheckState(demo->menu_style, MENU_STYLE_AUTO, FALSE);
             SetItemCheckState(demo->menu_style, MENU_STYLE_IMMERSIVE, FALSE);
             SetItemCheckState(demo->menu_style, MENU_STYLE_CLASSIC, TRUE);
-            MniSetIcmStyle(MNI, MNI_ICM_STYLE_CLASSIC);
+            MniSetIcmStyle(mni, MNI_ICM_STYLE_CLASSIC);
         }
         break;
     
@@ -444,7 +444,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
             SetItemCheckState(demo->menu_theme, MENU_THEME_AUTO, TRUE);
             SetItemCheckState(demo->menu_theme, MENU_THEME_LIGHT, FALSE);
             SetItemCheckState(demo->menu_theme, MENU_THEME_DARK, FALSE);
-            MniSetIcmTheme(MNI, MNI_ICM_THEME_AUTO);
+            MniSetIcmTheme(mni, MNI_ICM_THEME_AUTO);
         }
         break;
     case MENU_THEME_LIGHT:
@@ -452,7 +452,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
             SetItemCheckState(demo->menu_theme, MENU_THEME_AUTO, FALSE);
             SetItemCheckState(demo->menu_theme, MENU_THEME_LIGHT, TRUE);
             SetItemCheckState(demo->menu_theme, MENU_THEME_DARK, FALSE);
-            MniSetIcmTheme(MNI, MNI_ICM_THEME_LIGHT);
+            MniSetIcmTheme(mni, MNI_ICM_THEME_LIGHT);
         }
         break;
     case MENU_THEME_DARK:
@@ -460,7 +460,7 @@ void OnContextMenuClick(Mni4 *MNI, int selectedItem) {
             SetItemCheckState(demo->menu_theme, MENU_THEME_AUTO, FALSE);
             SetItemCheckState(demo->menu_theme, MENU_THEME_LIGHT, FALSE);
             SetItemCheckState(demo->menu_theme, MENU_THEME_DARK, TRUE);
-            MniSetIcmTheme(MNI, MNI_ICM_THEME_DARK);
+            MniSetIcmTheme(mni, MNI_ICM_THEME_DARK);
         }
         break;
     
@@ -559,7 +559,7 @@ int WINAPI wWinMain(
     info.on_lmb_double_click = OnLmbDoubleClick;
 
     // Init ModernNotifyIcon.
-    Mni4 mni;
+    Mni5 mni;
     if (MNI_FAILED(MniInit(&mni, info)))
     {
         MessageBoxW(NULL, L"Failed to initialize Notify Icon!", L"Error", MB_OK);
