@@ -149,6 +149,7 @@ typedef enum MniError {
     MNI_ERROR_FAILED_TO_CONVERT_TEXT        = -28,      ///< UTF-8 to UTF-16 conversion failed.
     MNI_ERROR_FAILED_TO_SEND_MESSAGE        = -29,      ///< Call to SendNotifyMessage(...) failed.
     MNI_ERROR_FAILED_TO_POST_MESSAGE        = -30,      ///< Call to PostMessage(...) failed.
+    MNI_ERROR_FAILED_TO_GET_ICON_RECT       = -31,      ///< Call to Shell_NotifyIconGetRect(...) failed.
 } MniError;
 
 /**
@@ -743,6 +744,14 @@ MNI_API MniError MniSendCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM
  * @return      status code, see #MniError
  */
 MNI_API MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam);
+
+/**
+ * @brief       Gets the screen coordinates of the bounding rectangle of a notification icon.
+ * @param       mni             pointer to Mni4 struct
+ * @param       pRect           pointer that receive icon coordinates
+ * @return      status code, see #MniError
+ */
+MNI_API MniError MniGetIconRect(Mni4 *mni, RECT *pRect);
 
 /**
  * @brief       Convert error code to string.
@@ -3388,6 +3397,39 @@ MniError MniPostCustomMessage(Mni4 *mni, UINT msg, WPARAM wParam, LPARAM lParam)
             return MNI_ERROR_FAILED_TO_POST_MESSAGE;
         }
     }
+
+    return MNI_OK;
+}
+
+// ========================================================================== //
+
+MNI_API MniError MniGetIconRect(Mni4 *mni, RECT *pRect) {
+    if (!mni) {
+        return MNI_ERROR_MNI_PTR_IS_NULL;
+    }
+
+    if (pRect == NULL) {
+        return MNI_ERROR_INVALID_ARGUMENT;
+    }
+
+    NOTIFYICONIDENTIFIER nii = {
+        .cbSize     = sizeof(nii),
+        .hWnd       = mni->window_handle,
+        .uID        = 0,
+        .guidItem   = MNI_GUID_NULL,
+    };
+
+    if (mni->use_guid) {
+        nii.guidItem = mni->guid;
+    }
+
+    RECT rect;
+    HRESULT hr = Shell_NotifyIconGetRect(&nii, &rect);
+    if (FAILED(hr)) {
+        return MNI_ERROR_FAILED_TO_GET_ICON_RECT;
+    }
+
+    *pRect = rect;
 
     return MNI_OK;
 }
