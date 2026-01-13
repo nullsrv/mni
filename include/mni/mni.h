@@ -1258,7 +1258,7 @@ typedef struct _PtrToWideStringResult {
     wchar_t buf[sizeof(void *) * 2 + 8];
 } _PtrToWideStringResult;
 
-static _PtrToWideStringResult _PtrToWideString(void *ptr, MniBool upper) {
+static _PtrToWideStringResult _PtrToWideString(void *ptr, MniBool upper, MniBool prefix) {
     uintptr_t value = (uintptr_t)ptr;
     int len = sizeof(void *) * 2;
     wchar_t local_buf[sizeof(void *) * 2];
@@ -1277,10 +1277,12 @@ static _PtrToWideStringResult _PtrToWideString(void *ptr, MniBool upper) {
     memset(&result, 0, sizeof(result));
 
     int pos = 0;
-    result.buf[pos] = L'0';
-    pos += 1;
-    result.buf[pos] = L'x'; //upper ? L'X' : L'x';
-    pos += 1;
+    if (prefix) {
+        result.buf[pos] = L'0';
+        pos += 1;
+        result.buf[pos] = L'x'; //upper ? L'X' : L'x';
+        pos += 1;
+    }
 
     for (int i = 0; i < len; i += 1) {
         result.buf[pos] = local_buf[len - i - 1];
@@ -2151,7 +2153,7 @@ static MniError _MniInternalCreateWindow(Mni5 *mni, MniInfo info) {
         const int name_cch = ARRAYSIZE(def_name) - 1;
 
         _StringCopyW(class_name, ARRAYSIZE(class_name), def_name);
-        _PtrToWideStringResult ptr_str = _PtrToWideString(mni, MNI_TRUE);
+        _PtrToWideStringResult ptr_str = _PtrToWideString(mni, MNI_TRUE, MNI_FALSE);
         _StringCopyW(&class_name[name_cch], ARRAYSIZE(class_name) - name_cch, ptr_str.buf);
     }
 
