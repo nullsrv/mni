@@ -299,6 +299,8 @@ typedef struct MniInfo {
     GUID                        guid;
     HICON                       icon;
     HMENU                       menu;
+    MniRdp                      icon_rdp;
+    MniRdp                      menu_rdp;
     const wchar_t               *tip;
     MniTipType                  tip_type;
     MniIcmStyle                 icm_style;
@@ -2338,6 +2340,8 @@ MniError MniInit(Mni5 *mni, MniInfo info) {
     MNI_TRACE(L"\t.guid=%p", &info.guid);
     MNI_TRACE(L"\t.icon=%p", info.icon);
     MNI_TRACE(L"\t.menu=%p", info.menu);
+    MNI_TRACE(L"\t.icon_rdp=%d", info.icon_rdp);
+    MNI_TRACE(L"\t.menu_rdp=%d", info.menu_rdp);
     MNI_TRACE(L"\t.tip=%p", info.tip);
     MNI_TRACE(L"\t.tip_type=%d", info.tip_type);
     MNI_TRACE(L"\t.window_title=%p", info.window_title);
@@ -2405,8 +2409,8 @@ MniError MniInit(Mni5 *mni, MniInfo info) {
     mni->icm_position = info.icm_position;
     mni->icm_animation = info.icm_animation;
 
-    mni->icon_rdp = MNI_RDP_AUTO;
-    mni->menu_rdp = MNI_RDP_AUTO;
+    mni->icon_rdp = info.icon_rdp;
+    mni->menu_rdp = info.menu_rdp;
 
     mni->reserved1 = info.reserved1;
     mni->reserved2 = info.reserved2;
