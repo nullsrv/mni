@@ -850,8 +850,13 @@ MNI_API const char *MniErrorToStringUTF8(MniError error);
 //    #include <icm/icm.h>    // ImmersiveTrackPopupMenu
 //#endif
 
-#define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
-#define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
+#ifndef GET_X_LPARAM
+    #define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
+#endif
+
+#ifndef GET_Y_LPARAM
+    #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
+#endif
 
 // Forward declare _MniInternalCreateNotifyIcon, used in explorer restart.
 static MniError _MniInternalCreateNotifyIcon(Mni5 *mni);
@@ -899,7 +904,6 @@ static MniError _MniInternalCreateNotifyIcon(Mni5 *mni);
 // MNI_TRACE macro
 // ========================================================================== //
 #define MNI_USE_TRACE 0
-#define MNI_TRACE_WINDOW_MESSAGES
 
 #if MNI_USE_TRACE > 0
 #include <stdarg.h>
@@ -1083,8 +1087,8 @@ static MniThemeInfo _GetAppsThemeInfo(void) {
     MniBool light = _AppsUseLightTheme();
     return (MniThemeInfo){
         .theme              = light ? MNI_THEME_LIGHT : MNI_THEME_DARK,
-            .text_color         = light ? 0x00000000 : 0x00FFFFFF,
-            .background_color   = light ? 0x00FFFFFF : 0x00000000,
+        .text_color         = light ? 0x00000000 : 0x00FFFFFF,
+        .background_color   = light ? 0x00FFFFFF : 0x00000000,
     };
 }
 
@@ -1094,8 +1098,8 @@ static MniThemeInfo _GetSystemThemeInfo(void) {
     MniBool light = _SystemUsesLightTheme();
     return (MniThemeInfo){
         .theme              = light ? MNI_THEME_LIGHT : MNI_THEME_DARK,
-            .text_color         = light ? 0x00000000 : 0x00FFFFFF,
-            .background_color   = light ? 0x00FFFFFF : 0x00000000,
+        .text_color         = light ? 0x00000000 : 0x00FFFFFF,
+        .background_color   = light ? 0x00FFFFFF : 0x00000000,
     };
 }
 
@@ -1107,8 +1111,8 @@ static MniThemeInfo _GetHighContrastThemeInfo(void) {
 
     return (MniThemeInfo){
         .theme              = MNI_THEME_HIGHCONTRAST,
-            .text_color         = fg,
-            .background_color   = bg,
+        .text_color         = fg,
+        .background_color   = bg,
     };
 }
 
@@ -1925,15 +1929,15 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 
     case WM_NOTIFYICON:
         switch (LOWORD(lParam)) {
-            // Left Click.
-            //case NIN_SELECT:
-            //    if (_MniWmKeySelect(mni, GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam))) {
-            //        return 0;
-            //    }
-            //    break;
+        // Left Click.
+        //case NIN_SELECT:
+        //    if (_MniWmKeySelect(mni, GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam))) {
+        //        return 0;
+        //    }
+        //    break;
 
-            // When you select icon with keyboard and press Space or Enter.
-            // Pressing Enter triggers this twice.
+        // When you select icon with keyboard and press Space or Enter.
+        // Pressing Enter triggers this twice.
         case NIN_KEYSELECT:
             if (_MniWmKeySelect(mni, GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam)))
             {
@@ -1941,7 +1945,7 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
             }
             break;
 
-            // When you Right Click on icon or Shift+F10 when it's selected with keyboard.
+        // When you Right Click on icon or Shift+F10 when it's selected with keyboard.
         case WM_CONTEXTMENU:
             if (_MniWmContextMenu(mni, GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam))) {
                 return 0;
@@ -2120,7 +2124,7 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
         break;
     } // switch (uMsg)
 
-      // explorer.exe restart / dpi changed.
+    // explorer.exe restart / dpi changed.
     if (uMsg == (UINT)mni->taskbar_created_message_id) {
         if (_MniWmTaskbarCreated(mni)) {
             return 0;
@@ -2369,8 +2373,8 @@ static MniError _MniInternalCreateNotifyIcon(Mni5 *mni) {
         .cbSize           = sizeof(nid),
         .hWnd             = mni->window_handle,
         .uID              = 0,
-        .uFlags           = NIF_TIP | NIF_ICON | NIF_MESSAGE, // NIF_TIP is required for
-        // standard tip and rich popup
+        .uFlags           = NIF_TIP | NIF_ICON | NIF_MESSAGE,   // NIF_TIP is required for
+                                                                // standard tip and rich popup
         .uCallbackMessage = WM_NOTIFYICON,
         .hIcon            = mni->icon,
         .szTip            = L"",
@@ -3808,7 +3812,6 @@ const char *MniErrorToStringUTF8(MniError error) {
     case MNI_ERROR_FAILED_TO_CONVERT_TEXT:          return "MNI_ERROR_FAILED_TO_CONVERT_TEXT";
     case MNI_ERROR_FAILED_TO_SEND_MESSAGE:          return "MNI_ERROR_FAILED_TO_SEND_MESSAGE";
     case MNI_ERROR_FAILED_TO_GET_ICON_RECT:         return "MNI_ERROR_FAILED_TO_GET_ICON_RECT";
-
     }
 
     return "MNI_UNKNOWN_ERROR_CODE";
