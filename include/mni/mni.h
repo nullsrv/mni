@@ -3096,7 +3096,7 @@ MniError MniGetAppsThemeInfo(Mni5 *mni, MniThemeInfo *apps_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmStyle(Mni5 *mni, MniIcmStyle icm_style) {
+MniError MniSetIcmStyle(Mni5 *mni, MniIcmStyle icm_style) {
     MNI_TRACE(L"MniSetIcmTheme(mni=%p, icm_style=%d)", mni, icm_style);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3111,7 +3111,7 @@ MNI_API MniError MniSetIcmStyle(Mni5 *mni, MniIcmStyle icm_style) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmTheme(Mni5 *mni, MniIcmTheme icm_theme) {
+MniError MniSetIcmTheme(Mni5 *mni, MniIcmTheme icm_theme) {
     MNI_TRACE(L"MniSetIcmTheme(mni=%p, icm_theme=%d)", mni, icm_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3126,7 +3126,7 @@ MNI_API MniError MniSetIcmTheme(Mni5 *mni, MniIcmTheme icm_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmPosition(Mni5 *mni, MniIcmPosition icm_pos) {
+MniError MniSetIcmPosition(Mni5 *mni, MniIcmPosition icm_pos) {
     MNI_TRACE(L"MniSetIcmPosition(mni=%p, icm_pos=%d)", mni, icm_pos);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3141,7 +3141,7 @@ MNI_API MniError MniSetIcmPosition(Mni5 *mni, MniIcmPosition icm_pos) {
 
 // ========================================================================== //
 
-MNI_API MniError MniSetIcmAnimation(Mni5 *mni, MniIcmAnimation icm_anim) {
+MniError MniSetIcmAnimation(Mni5 *mni, MniIcmAnimation icm_anim) {
     MNI_TRACE(L"MniSetIcmAnimation(mni=%p, icm_anim=%d)", mni, icm_anim);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3156,7 +3156,7 @@ MNI_API MniError MniSetIcmAnimation(Mni5 *mni, MniIcmAnimation icm_anim) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmStyle(Mni5 *mni, MniIcmStyle *icm_style) {
+MniError MniGetIcmStyle(Mni5 *mni, MniIcmStyle *icm_style) {
     MNI_TRACE(L"MniGetIcmStyle(mni=%p, icm_style=%p)", mni, icm_style);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3175,7 +3175,7 @@ MNI_API MniError MniGetIcmStyle(Mni5 *mni, MniIcmStyle *icm_style) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmTheme(Mni5 *mni, MniIcmTheme *icm_theme) {
+MniError MniGetIcmTheme(Mni5 *mni, MniIcmTheme *icm_theme) {
     MNI_TRACE(L"MniGetIcmTheme(mni=%p, icm_theme=%p)", mni, icm_theme);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3194,7 +3194,7 @@ MNI_API MniError MniGetIcmTheme(Mni5 *mni, MniIcmTheme *icm_theme) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmPosition(Mni5 *mni, MniIcmPosition *icm_pos) {
+MniError MniGetIcmPosition(Mni5 *mni, MniIcmPosition *icm_pos) {
     MNI_TRACE(L"MniGetIcmPosition(mni=%p, icm_pos=%p)", mni, icm_pos);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3213,7 +3213,7 @@ MNI_API MniError MniGetIcmPosition(Mni5 *mni, MniIcmPosition *icm_pos) {
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIcmAnimation(Mni5 *mni, MniIcmAnimation *icm_anim) {
+MniError MniGetIcmAnimation(Mni5 *mni, MniIcmAnimation *icm_anim) {
     MNI_TRACE(L"MniGetIcmAnimation(mni=%p, icm_anim=%p)", mni, icm_anim);
     MNI_ASSERT(mni && "mni ptr is null");
 
@@ -3532,7 +3532,7 @@ MniError MniPostCustomMessage(Mni5 *mni, UINT msg, WPARAM wParam, LPARAM lParam)
 
 // ========================================================================== //
 
-MNI_API MniError MniGetIconRect(Mni5 *mni, RECT *pRect) {
+MniError MniGetIconRect(Mni5 *mni, RECT *pRect) {
     if (!mni) {
         return MNI_ERROR_MNI_PTR_IS_NULL;
     }
