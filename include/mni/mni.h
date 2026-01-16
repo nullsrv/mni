@@ -253,6 +253,15 @@ typedef enum MniRdp {
 } MniRdp;
 
 /**
+* @enum MniExplorerRestartAction
+* @brief Action to take on explorer is_explorer_restart.
+*/
+typedef enum MniExplorerRestartAction {
+    MNI_EXPLORER_RESTART_ACTION_RECREATE    = 0,        ///< Automatically recreate icon on explorer restart.
+    MNI_EXPLORER_RESTART_ACTION_DO_NOTHING  = 1,        ///< Do nothing.
+} MniExplorerRestartAction;
+
+/**
  * @defgroup callbacks Callbacks prototypes.
  * @{
  */
@@ -301,6 +310,7 @@ typedef struct MniInfo {
     HMENU                       menu;
     MniRdp                      icon_rdp;
     MniRdp                      menu_rdp;
+    MniExplorerRestartAction    explorer_restart_action;
     const wchar_t               *tip;
     MniTipType                  tip_type;
     MniIcmStyle                 icm_style;
@@ -366,6 +376,7 @@ typedef struct Mni5 {
     MniIcmTheme                 icm_theme;
     MniRdp                      icon_rdp;
     MniRdp                      menu_rdp;
+    MniExplorerRestartAction    explorer_restart_action;
     int                         dpi;
     MniBool                     icon_created;
     MniBool                     icon_visible;
@@ -437,13 +448,19 @@ MNI_API MniError MniInit(Mni5 *mni, MniInfo info);
 MNI_API MniError MniRelease(Mni5 *mni);
 
 /**
+* @brief       Show the icon in notification area.
+* @param       mni             pointer to Mni5 struct
+* @return      status code, see #MniError
+*/
+MNI_API MniError MniShow(Mni5 *mni);
+
+/**
  * @brief       Show the icon in notification area.
- * @details     
  * @param       mni             pointer to Mni5 struct
  * @param       recreate        set to MNI_TRUE to recreate icon
  * @return      status code, see #MniError
  */
-MNI_API MniError MniShow(Mni5 *mni, MniBool recreate);
+MNI_API MniError MniShowEx(Mni5 *mni, MniBool recreate);
 
 /**
  * @brief       Hide the icon in notification area.
@@ -836,6 +853,9 @@ MNI_API const char *MniErrorToStringUTF8(MniError error);
 #define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
 #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 
+// Forward declare _MniInternalCreateNotifyIcon, used in explorer restart.
+static MniError _MniInternalCreateNotifyIcon(Mni5 *mni);
+
 // ========================================================================== //
 
 #define WM_NOTIFYICON                           (WM_USER + 0)
@@ -1022,6 +1042,27 @@ static MniBool _SystemUsesLightTheme(void) {
 
 // ========================================================================== //
 
+static DWORD _GetWindowsBuildNumber(void) {
+    typedef LONG NTSTATUS, *PNTSTATUS;
+    typedef NTSTATUS (WINAPI *pfnRtlGetVersion)(PRTL_OSVERSIONINFOW);
+    #define STATUS_SUCCESS (0x00000000)
+
+    RTL_OSVERSIONINFOW rovi = {0};
+
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    if (ntdll) {
+        pfnRtlGetVersion RtlGetVersionFn = (pfnRtlGetVersion)GetProcAddress(ntdll, "RtlGetVersion");
+        if (RtlGetVersionFn != NULL) {
+            rovi.dwOSVersionInfoSize = sizeof(rovi);
+            RtlGetVersionFn(&rovi);
+        }
+    }
+
+    return rovi.dwBuildNumber;
+}
+
+// ========================================================================== //
+
 static MniBool _IsHighContrastThemeEnabled(void) {
     HIGHCONTRASTW hc;
     hc.cbSize = sizeof(hc);
@@ -1081,17 +1122,53 @@ static HMONITOR _GetPrimaryMonitor(void) {
 // ========================================================================== //
 
 static int _GetDpi(HWND hWnd) {
-    typedef UINT (WINAPI *pfnGetDpiForWindow)(HWND);
+    typedef enum {
+        MDT_EFFECTIVE_DPI = 0,
+        MDT_ANGULAR_DPI = 1,
+        MDT_RAW_DPI = 2,
+        MDT_DEFAULT = MDT_EFFECTIVE_DPI
+    } MONITOR_DPI_TYPE;
 
-    // This is available since Windows 10 1607
-    pfnGetDpiForWindow GetDpiForWindowFn = 
-        (pfnGetDpiForWindow)GetProcAddress(GetModuleHandleW(L"User32"), "GetDpiForWindow");
+    typedef UINT (WINAPI *pfnGetDpiForWindow)(HWND);
+    typedef HRESULT (WINAPI *pfnGetGpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
 
     int dpi = 96;
+    MniBool fallback = MNI_TRUE;
+    DWORD build = _GetWindowsBuildNumber(); // TODO: cache this?
 
-    if (GetDpiForWindowFn) {
-        dpi = (int)GetDpiForWindowFn(hWnd);
+    // GetDpiForShellUIComponent() seems like good way to obtain dpi for notification area,
+    // but it looks like dpi event is triggered earlier than return value from this function.
+    // So using GetDpiForMonitor() instead.
+
+    if (build >= 22000 || (build < 14393 && build >= 9600)) {
+        HMODULE shcore = LoadLibraryW(L"shcore.dll");
+        if (shcore) {
+            pfnGetGpiForMonitor GetDpiForMonitorFn = 
+                (pfnGetGpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
+
+            HMONITOR hmon = _GetPrimaryMonitor();
+            UINT dpiX;
+            UINT dpiY;
+            if (SUCCEEDED(GetDpiForMonitorFn(hmon, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
+                dpi = (int)dpiX;
+                fallback = MNI_FALSE;
+            }
+
+            FreeLibrary(shcore);
+        }
     } else {
+        // NOTE: This is available since Windows 10 1607.
+        //       On Windows 11 this returns cached value when window is invisible.
+        pfnGetDpiForWindow GetDpiForWindowFn = 
+            (pfnGetDpiForWindow)GetProcAddress(GetModuleHandleW(L"User32"), "GetDpiForWindow");
+    
+        if (GetDpiForWindowFn) {
+            dpi = (int)GetDpiForWindowFn(hWnd);
+            fallback = MNI_FALSE;
+        }
+    }
+
+    if (fallback) {
         HDC hDC = GetDC(NULL);
         if (hDC != NULL) {
             int logPixelsX = GetDeviceCaps(hDC, LOGPIXELSX);
@@ -1705,16 +1782,51 @@ static MniBool _MniWmTaskbarCreated(Mni5 *mni) {
         mni->primary_monitor
     );
 
+    MniBool is_icon_dead = MNI_FALSE;
+    {
+        // Make dummy call to Shell_NotifyIconW() to check if icon still exists.
+        NOTIFYICONDATAW nid = {
+            .cbSize = sizeof(nid),
+            .hWnd   = mni->window_handle,
+            .uID    = 0,
+            .uFlags = NIF_ICON,
+            .hIcon  = mni->icon
+        };
+
+        if (mni->use_guid) {
+            nid.uFlags |= NIF_GUID;
+            nid.guidItem = mni->guid;
+        }
+
+        if (!Shell_NotifyIconW(NIM_MODIFY, &nid)) {
+            MNI_TRACE(L"\tICON NO LONGER EXISTS");
+            is_icon_dead = MNI_TRUE;
+        }
+    }
+
     if (mni->is_dpi_event) {
         mni->is_dpi_event = MNI_FALSE;
-    } else {
-        // NOTE: Setting these two here can lead to undesirable effects
-        //       if this was called from something else than explorer restart.
-        //       It's better to force recreating icon when re-showing.
-        // Icon no longer exists.
-        //mni->icon_visible = MNI_FALSE;
-        //mni->icon_created = MNI_FALSE;
+    }
+
+    if (is_icon_dead) {
         MNI_TRACE(L"\tEXPLORER RESTART");
+
+        MniBool was_visible = mni->icon_visible;
+
+        // Icon no longer exists.
+        mni->icon_created = MNI_FALSE;
+        mni->icon_visible = MNI_FALSE;
+
+        if (mni->explorer_restart_action == MNI_EXPLORER_RESTART_ACTION_RECREATE) {
+            // If icon was previously visible, re-create.
+            if (was_visible) {
+                MniError result = _MniInternalCreateNotifyIcon(mni);
+                if (MNI_FAILED(result)) {
+                    MNI_TRACE(L"\tFAILED TO CREATE NOTIFY ICON");
+                }
+            }
+        }
+
         if (mni->on_taskbar_created) {
             mni->on_taskbar_created(mni);
         }
@@ -1897,6 +2009,9 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
         //       changing dpi in system also trigger TaskbarCreated message.
         //       And if we call handler before TaskbarCreated, changing icons etc.
         //       doesn't work.
+
+        // NOTE: This message is not send on Windows 11 26200 (maybe earlier too),
+        //       if window is hidden. Works on Windows 10 19045.
         mni->is_dpi_event = MNI_TRUE;
         MNI_TRACE(L"DPI CHANGED");
         return 0;
@@ -1908,6 +2023,8 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
         if (mni->primary_monitor != monitor) {
             MNI_TRACE(L"PRIMARY MONITOR CHANGE");
             mni->primary_monitor = monitor;
+
+            // TODO: check dpi and trigger change?
 
             // Move invisible window to primary monitor for accurate dpi value.
             SetWindowPos(mni->window_handle, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE);
@@ -2191,8 +2308,8 @@ static MniError _MniInternalCreateWindow(Mni5 *mni, MniInfo info) {
             info.window_style,
             0,                  // we want to put window on main monitor
             0,                  // we want to put window on main monitor
+            200,
             100,
-            40,
             info.parent_window,
             NULL,
             hInstance,
@@ -2498,7 +2615,13 @@ MniError MniRelease(Mni5 *mni) {
 
 // ========================================================================== //
 
-MniError MniShow(Mni5 *mni, MniBool recreate) {
+MniError MniShow(Mni5 *mni) {
+    return MniShowEx(mni, MNI_FALSE);
+}
+
+// ========================================================================== //
+
+MniError MniShowEx(Mni5 *mni, MniBool recreate) {
     MNI_TRACE(L"MniShow(mni=%p, recreate=%d)", mni, recreate);
     MNI_ASSERT(mni && "mni ptr is null");
 

@@ -322,8 +322,6 @@ void OnLmbDoubleClick(Mni5 *mni, int x, int y) {
 }
 
 void OnTaskbarCreated(Mni5 *mni) {
-    // Set 'recreate' paramater to MNI_TRUE, so icon get recreated.
-    MniShow(mni, MNI_TRUE);
 }
 
 void OnDpiChange(Mni5 *mni, int dpi) {
@@ -340,7 +338,7 @@ void OnSystemThemeChange(Mni5 *mni, MniThemeInfo mti) {
 
 void OnTimer(Mni5 *mni, unsigned int timer_id) {
     if (timer_id == TIMER_HIDE_FOR_1_SEC) {
-        MniShow(mni, MNI_FALSE);
+        MniShow(mni);
         MniStopTimer(mni, TIMER_HIDE_FOR_1_SEC);
     }
 }
@@ -567,7 +565,7 @@ int WINAPI wWinMain(
     }
 
     // Show the icon in Notification Area.
-    if (MNI_FAILED(MniShow(&mni, MNI_FALSE)))
+    if (MNI_FAILED(MniShow(&mni)))
     {
         MessageBoxW(NULL, L"Failed to show Notify Icon!", L"Error", MB_OK);
         return 1;
