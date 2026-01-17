@@ -1125,7 +1125,7 @@ static HMONITOR _GetPrimaryMonitor(void) {
 
 // ========================================================================== //
 
-static int _GetDpi(HWND hWnd) {
+static int _GetDpi(HWND hWnd, HMONITOR hMonitor) {
     typedef enum {
         MDT_EFFECTIVE_DPI = 0,
         MDT_ANGULAR_DPI = 1,
@@ -1150,10 +1150,9 @@ static int _GetDpi(HWND hWnd) {
             pfnGetGpiForMonitor GetDpiForMonitorFn = 
                 (pfnGetGpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
 
-            HMONITOR hmon = _GetPrimaryMonitor();
             UINT dpiX;
             UINT dpiY;
-            if (SUCCEEDED(GetDpiForMonitorFn(hmon, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
+            if (SUCCEEDED(GetDpiForMonitorFn(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
                 dpi = (int)dpiX;
                 fallback = MNI_FALSE;
             }
@@ -1808,10 +1807,6 @@ static MniBool _MniWmTaskbarCreated(Mni5 *mni) {
         }
     }
 
-    if (mni->is_dpi_event) {
-        mni->is_dpi_event = MNI_FALSE;
-    }
-
     if (is_icon_dead) {
         MNI_TRACE(L"\tEXPLORER RESTART");
 
@@ -1836,9 +1831,8 @@ static MniBool _MniWmTaskbarCreated(Mni5 *mni) {
         }
     }
 
-    // We check for dpi change here.
-    int dpi = _GetDpi(mni->window_handle);
-    MNI_TRACE(L"\t_GetDpi(): %d", dpi);
+    // Check for dpi change.
+    int dpi = _GetDpi(mni->window_handle, mni->primary_monitor);
     if (mni->dpi != dpi) {
         SendMessageW(mni->window_handle, WM_DPICHANGED_DELAYED, (WPARAM)dpi, 0);
     }
@@ -2009,15 +2003,13 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
         break; // WM_NOTIFYICON
 
     case WM_DPICHANGED:
-        // NOTE: Not calling message handler immediately, because
+        // NOTE: Windows 10: not calling dpi message handler immediately, because
         //       changing dpi in system also trigger TaskbarCreated message.
         //       And if we call handler before TaskbarCreated, changing icons etc.
-        //       doesn't work.
+        //       doesn't work. The dpi change is checked in TaskbarCreated handler.
 
-        // NOTE: This message is not send on Windows 11 26200 (maybe earlier too),
-        //       if window is hidden. Works on Windows 10 19045.
-        mni->is_dpi_event = MNI_TRUE;
-        MNI_TRACE(L"DPI CHANGED");
+        // NOTE: Windows 11: this message is no longer send when window is invisible.
+        MNI_TRACE(L"DPI CHANGED (%d -> %d)", mni->dpi, LOWORD(wParam));
         return 0;
         //return _MniWmDpiChange(mni, LOWORD(wParam));
 
@@ -2025,13 +2017,17 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
     {
         HMONITOR monitor = _GetPrimaryMonitor();
         if (mni->primary_monitor != monitor) {
-            MNI_TRACE(L"PRIMARY MONITOR CHANGE");
+            MNI_TRACE(L"PRIMARY MONITOR CHANGE (%p -> %p)", mni->primary_monitor, monitor);
             mni->primary_monitor = monitor;
-
-            // TODO: check dpi and trigger change?
 
             // Move invisible window to primary monitor for accurate dpi value.
             SetWindowPos(mni->window_handle, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE);
+
+            // Check if new primary monitor has different dpi.
+            int dpi = _GetDpi(mni->window_handle, mni->primary_monitor);
+            if (mni->dpi != dpi) {
+                SendMessageW(mni->window_handle, WM_DPICHANGED_DELAYED, (WPARAM)dpi, 0);
+            }
         }
         return 0;
     }
@@ -2039,9 +2035,18 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 
     case WM_SETTINGCHANGE:
     {
+        MNI_TRACE(L"SETTINGS CHANGE (wParam: %p, lParam: %p)", wParam, lParam);
         if (wParam == SPI_SETHIGHCONTRAST) {
             if (_MniWmThemeChange(mni, MNI_TRUE)) {
                 return 0;
+            }
+        } else if (wParam == SPI_SETLOGICALDPIOVERRIDE) {
+            // HACK: This event is send when you change display scale in settings.
+            //       It works for now, but can't say how reliable this is.
+            //       So check if dpi changed by any chance.
+            int dpi = _GetDpi(mni->window_handle, mni->primary_monitor);
+            if (mni->dpi != dpi) {
+                SendMessageW(mni->window_handle, WM_DPICHANGED_DELAYED, (WPARAM)dpi, 0);
             }
         } else {
             if ((const wchar_t *)lParam != NULL) {
@@ -2124,7 +2129,7 @@ static LRESULT _MniDispatch(Mni5 *mni, HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
         break;
     } // switch (uMsg)
 
-    // explorer.exe restart / dpi changed.
+    // explorer.exe restart.
     if (uMsg == (UINT)mni->taskbar_created_message_id) {
         if (_MniWmTaskbarCreated(mni)) {
             return 0;
@@ -2578,7 +2583,7 @@ MniError MniInit(Mni5 *mni, MniInfo info) {
         return ret;
     }
 
-    mni->dpi = _GetDpi(mni->window_handle);
+    mni->dpi = _GetDpi(mni->window_handle, mni->primary_monitor);
 
     if (mni->window_handle) {
         SendMessageW(mni->window_handle, WM_MNI_INIT, 0, 0);
